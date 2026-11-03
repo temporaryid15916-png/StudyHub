@@ -1,1510 +1,624 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SSC StudyHub — স্মার্ট স্টাডি ড্যাশবোর্ড</title>
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#090f1d">
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
-    body {
-      font-family: 'Noto Sans Bengali', 'Hind Siliguri', sans-serif;
-    }
-    .custom-scroll::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scroll::-webkit-scrollbar-track {
-      background: #0f172a;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 4px;
-    }
-
-    body { transition: background-color .25s ease, color .25s ease; }
-    .progress-ring {
-      width: 92px; height: 92px; border-radius: 999px; display: grid; place-items: center;
-      background: conic-gradient(#fff var(--progress, 0deg), rgba(255,255,255,.16) 0deg);
-      position: relative;
-    }
-    .progress-ring::before {
-      content: ""; position: absolute; inset: 7px; border-radius: inherit; background: #4f46e5;
-    }
-    .progress-ring > div { position: relative; z-index: 1; text-align: center; color: #fff; line-height: 1; }
-    .progress-ring span { display:block; font-size: 18px; font-weight: 800; }
-    .progress-ring small { display:block; margin-top: 4px; font-size: 8px; opacity:.8; }
-    
-    /* Light Mode Styles */
-    .light-mode {
-      background: #f5f7fb !important;
-      color: #0f172a !important;
-    }
-    .light-mode header {
-      background: rgba(255,255,255,.88) !important;
-      border-color: #e2e8f0 !important;
-    }
-    .light-mode [class*="bg-slate-950"] {
-      background-color: #f8fafc !important;
-    }
-    .light-mode [class*="bg-slate-900"] {
-      background-color: #ffffff !important;
-    }
-    .light-mode [class*="bg-slate-850"],
-    .light-mode [class*="bg-slate-800"] {
-      background-color: #f1f5f9 !important;
-    }
-    .light-mode [class*="border-slate-800"],
-    .light-mode [class*="border-slate-700"] {
-      border-color: #e2e8f0 !important;
-    }
-    .light-mode [class*="text-white"] {
-      color: #0f172a !important;
-    }
-    .light-mode [class*="text-slate-100"],
-    .light-mode [class*="text-slate-200"],
-    .light-mode [class*="text-slate-300"] {
-      color: #334155 !important;
-    }
-    .light-mode [class*="text-slate-400"] { color: #64748b !important; }
-    .light-mode [class*="text-slate-500"] { color: #94a3b8 !important; }
-    .light-mode [class*="hover:bg-slate-800"]:hover { background-color: #e2e8f0 !important; }
-    .light-mode .bg-indigo-600,
-    .light-mode .bg-emerald-600 { color: #fff !important; }
-    .light-mode .progress-ring::before { background: #4f46e5; }
-    .light-mode input, .light-mode select, .light-mode textarea {
-      color: #0f172a !important; background-color: #ffffff !important; border-color: #cbd5e1 !important;
-    }
-    .light-mode .custom-scroll::-webkit-scrollbar-track { background:#e2e8f0; }
-    .light-mode .custom-scroll::-webkit-scrollbar-thumb { background:#cbd5e1; }
-
-    /* SSC StudyHub premium visual layer: intentionally distinct from the HSC tracker */
-    :root { color-scheme: dark; }
-    body { background-image: radial-gradient(ellipse at 12% 0%, rgba(79,70,229,.13), transparent 34%), radial-gradient(ellipse at 95% 20%, rgba(14,165,233,.08), transparent 28%); }
-    header.sticky { box-shadow: 0 8px 30px rgba(2,6,23,.18); }
-    #view-chapters > .relative:first-child { border:1px solid rgba(255,255,255,.18); }
-    .premium-card { background:linear-gradient(145deg,rgba(49,46,129,.28),rgba(15,23,42,.96)); border:1px solid rgba(148,163,184,.16); box-shadow:0 14px 35px rgba(2,6,23,.14); }
-    .light-mode .premium-card { background:linear-gradient(145deg,#fff,#f5f8ff); border-color:#e2e8f0; }
-    #chapters-grid > div { min-height:190px; box-shadow:0 8px 24px rgba(2,6,23,.10); }
-    #chapters-grid > div:hover { transform:translateY(-3px); box-shadow:0 15px 32px rgba(2,6,23,.2); }
-    #chapters-grid > div { transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease; }
-    button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible { outline:2px solid #818cf8; outline-offset:2px; }
-    .status-btn { white-space:nowrap; }
-    /* Refined filters, chapter progress and app-owned confirmation dialog */
-    #subject-filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); }
-    #subject-filters button { min-height:58px; text-align:left; white-space:normal; }
-    .filter-panel { background:rgba(15,23,42,.72); border:1px solid rgba(148,163,184,.18); }
-    .chapter-status-action { cursor:pointer; }
-    .chapter-progress-track { height:5px; border-radius:999px; overflow:hidden; background:#334155; }
-    .chapter-progress-fill { height:100%; border-radius:999px; transition:width .25s ease; }
-    #confirm-modal { position:fixed; inset:0; z-index:95; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(2,6,23,.78); backdrop-filter:blur(8px); }
-    #confirm-modal.show { display:flex; }
-    #confirm-modal .confirm-box { width:100%; max-width:420px; padding:24px; border-radius:22px; background:#111827; border:1px solid #334155; box-shadow:0 25px 80px rgba(0,0,0,.45); }
-    .light-mode #confirm-modal .confirm-box { background:#fff; color:#0f172a; }
-    .light-mode .filter-panel { background:rgba(255,255,255,.88); border-color:#e2e8f0; }
-    .light-mode .chapter-progress-track { background:#e2e8f0; }
-    @media(max-width:640px) { #subject-filters { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    #study-floating { position:fixed;right:16px;bottom:16px;z-index:45;display:none;align-items:center;gap:9px;padding:11px 15px;border-radius:999px;background:#312e81;color:#fff;border:1px solid rgba(165,180,252,.55);box-shadow:0 10px 30px rgba(49,46,129,.35);font-size:12px;font-weight:800;cursor:pointer; }
-    #study-floating.show { display:flex; }
-    #study-floating.running { animation:focusGlow 1.8s ease-in-out infinite; }
-    @keyframes focusGlow { 0%,100% { box-shadow:0 8px 24px rgba(99,102,241,.18); } 50% { box-shadow:0 0 0 5px rgba(129,140,248,.12),0 8px 28px rgba(99,102,241,.42); } }
-    #app-toast { position:fixed;left:50%;bottom:22px;transform:translate(-50%,15px);opacity:0;pointer-events:none;z-index:100;max-width:calc(100vw - 28px);padding:11px 16px;border-radius:13px;background:#0f172a;color:#f8fafc;border:1px solid #334155;box-shadow:0 12px 35px rgba(0,0,0,.28);font-size:12px;font-weight:700;transition:opacity .2s,transform .2s; }
-    #app-toast.show { opacity:1;transform:translate(-50%,0); }
-    #reset-modal { position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(2,6,23,.76);backdrop-filter:blur(8px); }
-    #reset-modal.show { display:flex; }
-    #reset-modal .reset-box { width:100%;max-width:390px;padding:24px;border-radius:22px;background:#111827;border:1px solid #334155;box-shadow:0 25px 80px rgba(0,0,0,.45); }
-    .light-mode #reset-modal .reset-box { background:#fff;color:#0f172a; }
-    @media(max-width:640px) { #study-floating { right:10px;bottom:10px;padding:10px 12px; } #chapters-grid > div { min-height:0; } }
-
-  
-    /* Colorful dark theme enhancement: richer accents, while keeping the dark base */
-    body:not(.light-mode) {
-      background-color:#080d1b;
-      background-image:
-        radial-gradient(ellipse at 8% 0%, rgba(124,58,237,.22), transparent 32%),
-        radial-gradient(ellipse at 92% 8%, rgba(6,182,212,.15), transparent 30%),
-        radial-gradient(ellipse at 50% 100%, rgba(236,72,153,.08), transparent 38%);
-    }
-    body:not(.light-mode) header.sticky {
-      background-image:linear-gradient(100deg,rgba(15,23,42,.97),rgba(30,27,75,.94),rgba(15,23,42,.97));
-      border-bottom-color:rgba(129,140,248,.24)!important;
-    }
-    body:not(.light-mode) #view-chapters > .relative:first-child {
-      background-image:linear-gradient(120deg,rgba(79,70,229,.22),rgba(14,165,233,.12),rgba(217,70,239,.10));
-      border-color:rgba(129,140,248,.30);
-      box-shadow:0 18px 50px rgba(49,46,129,.14);
-    }
-    body:not(.light-mode) .filter-panel {
-      background:linear-gradient(135deg,rgba(30,41,59,.88),rgba(17,24,39,.92),rgba(49,46,129,.14));
-      border-color:rgba(129,140,248,.25);
-      box-shadow:0 12px 35px rgba(2,6,23,.14);
-    }
-    body:not(.light-mode) #subject-filters button {
-      background-image:linear-gradient(145deg,rgba(30,41,59,.96),rgba(15,23,42,.96));
-      border-color:rgba(148,163,184,.22);
-      box-shadow:inset 0 1px rgba(255,255,255,.025);
-      transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
-    }
-    body:not(.light-mode) #subject-filters button:nth-child(6n+1) { border-bottom:2px solid #818cf8; }
-    body:not(.light-mode) #subject-filters button:nth-child(6n+2) { border-bottom:2px solid #22d3ee; }
-    body:not(.light-mode) #subject-filters button:nth-child(6n+3) { border-bottom:2px solid #34d399; }
-    body:not(.light-mode) #subject-filters button:nth-child(6n+4) { border-bottom:2px solid #fbbf24; }
-    body:not(.light-mode) #subject-filters button:nth-child(6n+5) { border-bottom:2px solid #f472b6; }
-    body:not(.light-mode) #subject-filters button:nth-child(6n) { border-bottom:2px solid #fb923c; }
-    body:not(.light-mode) #subject-filters button:hover {
-      transform:translateY(-2px);
-      border-color:rgba(165,180,252,.7);
-      box-shadow:0 10px 24px rgba(79,70,229,.16);
-    }
-    body:not(.light-mode) #subject-filters button.bg-indigo-600 {
-      background-image:linear-gradient(135deg,#4f46e5,#7c3aed 58%,#a21caf);
-      border-color:#a5b4fc;
-    }
-    body:not(.light-mode) #chapters-grid > article {
-      position:relative;
-      overflow:hidden;
-      background:linear-gradient(155deg,rgba(30,41,59,.96),rgba(15,23,42,.98) 62%,rgba(30,27,75,.25));
-      border-color:rgba(148,163,184,.20);
-      box-shadow:0 10px 28px rgba(2,6,23,.18);
-    }
-    body:not(.light-mode) #chapters-grid > article::before {
-      content:"";
-      position:absolute;
-      top:0;left:0;right:0;height:3px;
-      background:linear-gradient(90deg,#818cf8,#22d3ee,#34d399,#fbbf24,#f472b6);
-      opacity:.85;
-    }
-    body:not(.light-mode) #chapters-grid > article:hover {
-      border-color:rgba(129,140,248,.48);
-      box-shadow:0 16px 38px rgba(79,70,229,.16);
-    }
-    body:not(.light-mode) .chapter-progress-track { background:rgba(148,163,184,.18); }
-    body:not(.light-mode) .chapter-progress-fill {
-      background-image:linear-gradient(90deg,#818cf8,#22d3ee)!important;
-      box-shadow:0 0 12px rgba(34,211,238,.24);
-    }
-    body:not(.light-mode) #chapters-grid > article .bg-emerald-500\/10 { background-color:rgba(16,185,129,.16); }
-    body:not(.light-mode) #chapters-grid > article .bg-sky-500\/10 { background-color:rgba(14,165,233,.16); }
-    body:not(.light-mode) #chapters-grid > article .bg-indigo-500\/10 { background-color:rgba(99,102,241,.17); }
-    body:not(.light-mode) button.bg-indigo-600 {
-      background-image:linear-gradient(135deg,#4f46e5,#7c3aed);
-      box-shadow:0 5px 16px rgba(99,102,241,.18);
-    }
-    body:not(.light-mode) button.bg-emerald-600 {
-      background-image:linear-gradient(135deg,#059669,#0d9488);
-    }
-    body:not(.light-mode) input:focus,body:not(.light-mode) select:focus,body:not(.light-mode) textarea:focus {
-      border-color:#818cf8!important;
-      box-shadow:0 0 0 3px rgba(129,140,248,.12);
-    }
-    body:not(.light-mode) .progress-ring {
-      background:conic-gradient(#a78bfa var(--progress,0deg),rgba(148,163,184,.18) 0deg);
-      box-shadow:0 0 28px rgba(124,58,237,.18);
-    }
-
-
-    /* Mobile-first polish: prevent clipped controls and keep navigation/icons visible. */
-    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: smooth; }
-    body { overflow-x: hidden; }
-    button, input, select, textarea { font: inherit; }
-    button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-    i[data-lucide], .icon-fallback { display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; line-height:1; font-style:normal; }
-    .icon-fallback { min-width:1em; min-height:1em; font-family:system-ui,sans-serif; font-weight:800; }
-    header .overflow-x-auto { scrollbar-width:thin; scrollbar-color:#6366f1 transparent; }
-    header .overflow-x-auto > button { flex:0 0 auto; white-space:nowrap; min-height:42px; }
-    #chapters-grid > article { min-width:0; min-height:190px; box-shadow:0 8px 24px rgba(2,6,23,.12); }
-    #chapters-grid > article:hover { transform:translateY(-2px); box-shadow:0 14px 30px rgba(2,6,23,.2); }
-    #chapters-grid > article { transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease; }
-    #subject-filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr)); gap:10px; }
-    #subject-filters > button { min-width:0; overflow-wrap:anywhere; }
-    #view-pomodoro .text-6xl { font-size:clamp(2.5rem,12vw,4rem); letter-spacing:.03em; }
-    #view-pomodoro .rounded-3xl { padding:clamp(1.1rem,5vw,2rem); }
-    #view-goals input { min-width:0; }
-    #view-planner input, #view-planner select { max-width:100%; color-scheme:dark; }
-    .light-mode #view-planner input { color-scheme:light; }
-    .light-mode .filter-panel { color:#0f172a; }
-    .light-mode #view-goals input, .light-mode #view-planner input { background:#fff !important; color:#0f172a !important; border-color:#cbd5e1 !important; }
-    .light-mode #chapters-grid > article { background:linear-gradient(145deg,#fff,#f5f8ff) !important; border-color:#dbe4f0 !important; }
-    .light-mode #chapters-grid > article .border-slate-800 { border-color:#e2e8f0 !important; }
-    .goal-row { display:flex; align-items:center; gap:10px; padding:12px; border:1px solid rgba(148,163,184,.18); border-radius:14px; background:rgba(30,41,59,.52); }
-    .goal-row .goal-text { min-width:0; flex:1; overflow-wrap:anywhere; }
-    .goal-row.is-done .goal-text { opacity:.6; text-decoration:line-through; }
-    .goal-row button { flex:0 0 auto; }
-    .light-mode .goal-row { background:#f8fafc; border-color:#e2e8f0; }
-    @media (max-width:640px) {
-      main { padding-left:12px !important; padding-right:12px !important; padding-top:16px !important; }
-      header > div { padding-left:12px !important; padding-right:12px !important; }
-      header .h-16 { height:auto; min-height:64px; gap:8px; }
-      header .overflow-x-auto { margin-left:-2px; margin-right:-2px; gap:5px; }
-      header .overflow-x-auto > button { padding:9px 11px; font-size:11px; }
-      #view-chapters > .relative:first-child { padding:18px !important; border-radius:22px; }
-      #view-chapters .progress-ring { width:78px; height:78px; }
-      #view-chapters .progress-ring::before { inset:6px; }
-      #view-chapters .progress-ring span { font-size:16px; }
-      #chapters-grid { grid-template-columns:minmax(0,1fr) !important; }
-      #chapters-grid > article { min-height:0; padding:16px; }
-      #subject-filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
-      #subject-filters > button { padding:10px; }
-      #view-goals > div, #view-planner > div { padding:16px; }
-      #view-goals .flex.gap-2 { align-items:stretch; }
-      #view-goals .flex.gap-2 > button { padding-left:11px; padding-right:11px; }
-      #study-floating { right:10px; bottom:calc(10px + env(safe-area-inset-bottom)); max-width:calc(100vw - 20px); }
-      #app-toast { bottom:calc(18px + env(safe-area-inset-bottom)); }
-      #chapter-modal > div { max-height:calc(100dvh - 24px); }
-      #confirm-modal .confirm-box, #reset-modal .reset-box { padding:20px; }
-    }
-    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; } }
-
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
+<title>SSC StudyHub</title>
+<script>try{if(localStorage.getItem("ssc_theme")==="light")document.documentElement.classList.add("light");else document.documentElement.classList.add("dark");}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f4f9;--card:#fff;--soft:#e8eef6;--text:#0f172a;--muted:#64748b;--border:#dce4f0;--primary:#2563eb;--primary-soft:#dbeafe;--success:#059669;--success-soft:#d1fae5;--warning:#d97706;--warning-soft:#fef3c7;--danger:#dc2626;--purple:#7c3aed;--shadow:0 4px 6px -1px rgba(15,23,42,.04),0 10px 28px -6px rgba(15,23,42,.08);--shadow-lg:0 12px 40px -8px rgba(15,23,42,.14);--radius:20px}
+html.dark,body.dark{--bg:#070d1a;--card:#0f172a;--soft:#1a2438;--text:#f1f5f9;--muted:#94a3b8;--border:#1e2a3f;--primary:#60a5fa;--primary-soft:#1e3a8a;--success:#34d399;--success-soft:#064e3b;--warning:#fbbf24;--warning-soft:#422006;--danger:#f87171;--purple:#a78bfa;--shadow:0 4px 6px -1px rgba(0,0,0,.35),0 12px 32px -6px rgba(0,0,0,.45);--shadow-lg:0 16px 48px -8px rgba(0,0,0,.55)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;min-height:100%;overflow-x:hidden}
+body{font-family:"Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(37,99,235,.08),transparent),radial-gradient(ellipse 60% 40% at 90% 10%,rgba(124,58,237,.06),transparent);pointer-events:none;z-index:-1}
+button,input,select,textarea{font:inherit} button{cursor:pointer;border:0}
+.topbar{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(22px);border-bottom:1px solid var(--border)}
+.wrap{max-width:1180px;margin:auto;width:100%}
+.topbar-inner{padding:13px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#2563eb,#7c3aed);font-size:20px;box-shadow:0 6px 18px rgba(37,99,235,.38)}
+.brand h1{font-size:18.5px;font-weight:800;letter-spacing:-.025em}
+.header-actions{display:flex;gap:8px;align-items:center}
+.btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:9px 15px;border-radius:12px;font-size:12.5px;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn.primary{background:linear-gradient(135deg,#2563eb,#1d4ed8);border-color:transparent;color:#fff}
+.btn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);border-color:transparent;color:#fff}
+.container{padding:20px 16px 48px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat,.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.stat{padding:18px;position:relative;overflow:hidden}
+.stat::after{content:"";position:absolute;top:0;left:0;right:0;height:3.5px;background:linear-gradient(90deg,#2563eb,#7c3aed)}
+.label{font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.value{font-size:28px;font-weight:800;margin-top:5px;letter-spacing:-.035em}
+.sub{font-size:12px;color:var(--muted);margin-top:4px}
+.quick{margin:16px 0;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.quick .card{padding:15px 16px;display:flex;gap:13px;align-items:center}
+.qicon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:var(--soft);font-size:19px}
+.qval{font-size:17px;font-weight:800}
+.continue{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 20px;margin-bottom:18px;background:linear-gradient(135deg,var(--primary-soft),var(--card) 55%);border:1px solid color-mix(in srgb,var(--primary) 28%,var(--border));border-radius:var(--radius)}
+.kicker{font-size:11px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.07em}
+.continue h2{font-size:16.5px;margin-top:4px}
+.continue p{font-size:12.5px;color:var(--muted);margin-top:3px}
+.tabs{display:flex;gap:6px;padding:6px;margin-bottom:18px;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow-x:auto}
+.tab{white-space:nowrap;padding:10px 16px;border-radius:11px;background:transparent;color:var(--muted);font-size:12.5px;font-weight:700}
+.tab.active{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff}
+.panel{display:none}.panel.active{display:block}
+.toolbar{padding:16px;margin-bottom:16px}
+.toolbar-top{display:grid;grid-template-columns:1fr 220px;gap:10px}
+.input,.select{width:100%;border:1px solid var(--border);background:var(--soft);color:var(--text);border-radius:12px;padding:11px 14px;font-size:13px;outline:0}
+.filters{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.filter{padding:7px 12px;border:1px solid var(--border);background:var(--soft);color:var(--text);border-radius:10px;font-size:11.5px;font-weight:700}
+.filter.active{background:linear-gradient(135deg,#2563eb,#1d4ed8);border-color:transparent;color:#fff}
+.subjects{display:grid;gap:14px}
+.subject{overflow:hidden}
+.subject-head{display:flex;align-items:center;gap:14px;padding:16px 17px;border-bottom:1px solid var(--border);cursor:pointer}
+.subject-icon{width:44px;height:44px;border-radius:13px;background:var(--primary-soft);display:grid;place-items:center;font-size:21px}
+.subject-info{min-width:0;flex:1}
+.subject-title{font-size:15.5px;font-weight:750;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge-pct{font-size:11px;font-weight:800;background:var(--success-soft);color:var(--success);padding:2px 9px;border-radius:99px}
+.subject-meta{font-size:12.5px;color:var(--muted);margin-top:3px}
+.subject-progress{width:155px}
+.smallbar{height:7px;background:var(--soft);border-radius:99px;overflow:hidden}
+.smallbar i{display:block;height:100%;background:linear-gradient(90deg,#059669,#34d399)}
+.chev{width:30px;height:30px;border-radius:9px;background:var(--soft);display:grid;place-items:center;color:var(--muted)}
+.subject.collapsed .chev{transform:rotate(-90deg)}
+.subject.collapsed .subject-body{display:none}
+.subject-body{padding:11px;background:var(--soft)}
+.chapters{display:grid;gap:8px}
+.chapter{display:flex;align-items:center;gap:11px;padding:12px 13px;background:var(--card);border:1px solid var(--border);border-radius:13px}
+.chapter.reading{background:var(--warning-soft);border-color:color-mix(in srgb,var(--warning) 32%,var(--border))}
+.chapter.mastered{background:var(--success-soft);border-color:color-mix(in srgb,var(--success) 32%,var(--border))}
+.num{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:var(--soft);font-size:12px;font-weight:750;color:var(--muted)}
+.chapter.reading .num{background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff}
+.chapter.mastered .num{background:linear-gradient(135deg,#059669,#10b981);color:#fff}
+.chapter-main{min-width:0;flex:1}
+.chapter-name{font-size:13.5px;font-weight:650}
+.chapter-status{font-size:11.5px;color:var(--muted);margin-top:2px}
+.tools{display:flex;gap:6px;flex:none;flex-wrap:wrap;justify-content:flex-end}
+.mini{padding:7px 11px;border-radius:9px;background:var(--soft);color:var(--text);border:1px solid var(--border);font-size:11.5px;font-weight:700}
+.section{padding:20px;margin-bottom:15px}
+.section h2{font-size:17.5px}
+.section p{font-size:12.5px;color:var(--muted);margin-top:4px}
+.modal,.pomo{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(2,6,23,.82);backdrop-filter:blur(12px)}
+.modal{z-index:1000}.pomo{z-index:900}
+.modal.show,.pomo.show{display:flex}
+.modalbox,.pomo-box{width:100%;max-width:540px;max-height:90vh;overflow:auto;padding:26px;border-radius:22px;background:var(--card);color:var(--text);border:1px solid var(--border)}
+.pomo-clock{font-size:clamp(54px,15vw,92px);font-family:ui-monospace,Menlo,monospace;font-weight:800;letter-spacing:-.04em;margin:14px 0;text-align:center}
+.pomo-controls{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:16px}
+.toast{position:fixed;right:20px;bottom:20px;z-index:2000;padding:12px 18px;border-radius:13px;background:var(--text);color:var(--bg);font-size:13px;font-weight:700;opacity:0;transform:translateY(14px);pointer-events:none;transition:.28s}
+.toast.show{opacity:1;transform:none}
+.float{position:fixed;right:16px;bottom:16px;z-index:40;display:none;align-items:center;gap:8px;padding:11px 15px;border-radius:999px;background:#1d4ed8;color:#fff;font-size:12px;font-weight:800;box-shadow:var(--shadow-lg)}
+.float.show{display:flex}
+.goal{display:flex;gap:10px;align-items:center;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--soft);margin-top:8px}
+.goal.done span{text-decoration:line-through;opacity:.6}
+.canvaswrap{height:240px;background:var(--soft);border-radius:16px;overflow:hidden;margin-top:12px}
+.canvaswrap canvas{width:100%;height:100%;display:block}
+footer{text-align:center;color:var(--muted);font-size:12.5px;padding:28px}
+@media(max-width:900px){.grid4,.quick{grid-template-columns:1fr 1fr}.subject-progress{display:none}.toolbar-top{grid-template-columns:1fr}}
+@media(max-width:560px){.chapter{flex-wrap:wrap}.tools{width:100%}}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
-
-  <!-- Header -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
-      <div class="flex items-center justify-between h-16 gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-            <i data-lucide="book-open" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h1 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <span>SSC StudyHub</span>
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                ২০২৬ সংস্করণ
-              </span>
-            </h1>
-            <p class="text-[11px] text-slate-400 hidden sm:block">তোমার SSC প্রস্তুতির স্মার্ট ড্যাশবোর্ড</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2 text-xs">
-          <div class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800">
-            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-            <span id="mastered-count-badge" class="text-emerald-400 font-bold">0</span>
-            <span class="text-slate-500">প্রস্তুত</span>
-          </div>
-          <button onclick="toggleTheme()" id="theme-toggle" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition-all" title="থিম পরিবর্তন">
-            <i data-lucide="sun" class="w-4 h-4"></i>
-          </button>
-          <button onclick="resetAllProgress()" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-slate-300 transition-all" title="প্রগ্রেস রিসেট">
-            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-          </button>
-        </div>
+<body>
+<div class="topbar"><div class="wrap topbar-inner">
+  <div class="brand" onclick="switchTab('syllabus')"><div class="brand-icon">📚</div><div><h1>SSC StudyHub</h1><div class="sub" style="margin:0">SSC Science · Chapter Tracker</div></div></div>
+  <div class="header-actions">
+    <button class="btn primary" onclick="openPomo()">🍅 Pomodoro</button>
+    <button class="btn" id="themeBtn" onclick="toggleTheme()">☀ Light</button>
+  </div>
+</div></div>
+<div class="wrap container">
+  <div class="grid4">
+    <div class="stat"><div class="label">Total chapters</div><div class="value" id="stTotal">98</div><div class="sub">8 subjects</div></div>
+    <div class="stat"><div class="label">Completed</div><div class="value" id="stDone">0</div><div class="sub">সম্পন্ন অধ্যায়</div></div>
+    <div class="stat"><div class="label">In progress</div><div class="value" id="stRead">0</div><div class="sub">চলমান</div></div>
+    <div class="stat"><div class="label">Overall</div><div class="value" id="stPct">0%</div><div class="sub">Syllabus completion</div></div>
+  </div>
+  <div class="quick">
+    <div class="card"><div class="qicon">🍅</div><div><div class="label">Today's focus</div><div class="qval" id="qToday">0m</div></div></div>
+    <div class="card"><div class="qicon">🔥</div><div><div class="label">Study streak</div><div class="qval" id="qStreak">0 days</div></div></div>
+    <div class="card"><div class="qicon">🎯</div><div><div class="label">Daily goal</div><div class="qval" id="qGoal">0%</div></div></div>
+    <div class="card"><div class="qicon">📝</div><div><div class="label">Exam</div><div class="qval" id="qExam">—</div></div></div>
+  </div>
+  <div class="continue">
+    <div><div class="kicker">Continue studying</div><h2 id="contTitle">একটি অধ্যায় বেছে নাও</h2><p id="contSub">SSC সিলেবাসের ৯৮টি অধ্যায়</p></div>
+    <div style="display:flex;gap:8px"><button class="btn" onclick="switchTab('syllabus')">View syllabus</button><button class="btn primary" id="contStudy">🍅 Study</button></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="syllabus" onclick="switchTab('syllabus')">Syllabus</button>
+    <button class="tab" data-tab="goals" onclick="switchTab('goals')">Daily routine</button>
+    <button class="tab" data-tab="planner" onclick="switchTab('planner')">Planner</button>
+    <button class="tab" data-tab="history" onclick="switchTab('history')">History</button>
+  </div>
+  <section class="panel active" id="panel-syllabus">
+    <div class="card toolbar">
+      <div class="toolbar-top">
+        <input class="input" id="search" placeholder="অধ্যায় বা বিষয় খুঁজুন..." oninput="renderSyllabus()">
+        <select class="select" id="statusSel" onchange="setFilter(this.value)"><option value="all">সব স্ট্যাটাস</option><option value="not_started">অসম্পূর্ণ</option><option value="reading">চলমান</option><option value="mastered">সম্পন্ন</option><option value="bookmarked">বুকমার্ক</option></select>
       </div>
-
-      <!-- Navigation Tabs -->
-      <div class="flex items-center gap-1 overflow-x-auto border-t border-slate-800/80 pt-1 pb-2">
-        <button onclick="switchTab('chapters')" id="tab-btn-chapters" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-indigo-600 text-white shadow-md">
-          <i data-lucide="layers" class="w-4 h-4"></i> অধ্যায় ট্র্যাকার
-        </button>
-        <button onclick="switchTab('pomodoro')" id="tab-btn-pomodoro" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
-          <i data-lucide="clock" class="w-4 h-4"></i> পোমোডোরো টাইমার
-        </button>
-        <button onclick="switchTab('goals')" id="tab-btn-goals" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
-          <i data-lucide="target" class="w-4 h-4"></i> ডেইলি রুটিন
-        </button>
-        <button onclick="switchTab('planner')" id="tab-btn-planner" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-400 hover:text-white hover:bg-slate-800/60">
-          <i data-lucide="calendar-check" class="w-4 h-4"></i> পরিকল্পনা ও বিশ্লেষণ
-        </button>
+      <div class="filters" id="subFilters"></div>
+    </div>
+    <div class="subjects" id="subjects"></div>
+  </section>
+  <section class="panel" id="panel-goals">
+    <div class="card section">
+      <h2>আজকের পড়ার লক্ষ্য</h2>
+      <p>চেকলিস্ট শুধু এই ডিভাইসে সেভ হয়।</p>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <input class="input" id="goalInput" placeholder="আজকে কী পড়বে..." onkeydown="if(event.key==='Enter')addGoal()">
+        <button class="btn primary" onclick="addGoal()">যোগ</button>
+      </div>
+      <div id="goals"></div>
+    </div>
+  </section>
+  <section class="panel" id="panel-planner">
+    <div class="card section">
+      <h2>পরীক্ষার পরিকল্পনা</h2>
+      <p>SSC তারিখ ও দৈনিক ফোকাস লক্ষ্য।</p>
+      <div class="grid4" style="margin-top:14px">
+        <label class="stat" style="grid-column:span 2"><div class="label">Exam date</div><input class="input" style="margin-top:8px" type="date" id="examDate" onchange="savePlanner()"><div class="sub" id="examLeft"></div></label>
+        <label class="stat" style="grid-column:span 2"><div class="label">Daily goal (min)</div><input class="input" style="margin-top:8px" type="number" min="15" max="600" id="dailyGoal" value="120" onchange="savePlanner()"></label>
       </div>
     </div>
-  </header>
-
-  <!-- Main Container -->
-  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6">
-
-    <!-- 1. CHAPTERS TAB -->
-    <section id="view-chapters" class="space-y-6">
-      <!-- Premium Dashboard Hero -->
-      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-sky-500 p-5 sm:p-7 shadow-2xl shadow-indigo-900/20">
-        <div class="absolute -right-16 -top-20 w-56 h-56 rounded-full bg-white/10 blur-2xl"></div>
-        <div class="absolute -left-10 -bottom-20 w-44 h-44 rounded-full bg-sky-300/10 blur-2xl"></div>
-        <div class="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div class="max-w-2xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-white/90 text-[11px] font-semibold mb-3">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> SSC StudyHub • Smart Study Dashboard
-            </div>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">আজকের পড়াশোনা, এক জায়গায়।</h2>
-            <p class="mt-2 text-sm text-indigo-100/90 max-w-xl">অধ্যায়ের অগ্রগতি ট্র্যাক করুন, নোট রাখুন এবং Focus Timer দিয়ে পড়ার সময়টা গুছিয়ে নিন।</p>
-            <div class="flex flex-wrap gap-2 mt-5">
-              <button onclick="focusSearch()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-indigo-700 text-xs font-bold shadow-lg hover:bg-indigo-50 transition-all">
-                <i data-lucide="search" class="w-4 h-4"></i> অধ্যায় খুঁজুন
-              </button>
-              <button onclick="switchTab('pomodoro')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-xs font-bold hover:bg-white/15 transition-all">
-                <i data-lucide="timer" class="w-4 h-4"></i> Focus Timer
-              </button>
-            </div>
-          </div>
-          <div class="shrink-0 flex items-center gap-4 bg-white/10 border border-white/15 rounded-2xl p-4 backdrop-blur-sm">
-            <div class="progress-ring" id="progress-ring"><div><span id="hero-progress">0%</span><small>complete</small></div></div>
-            <div class="text-white">
-              <div class="text-xs text-indigo-100">তোমার প্রগ্রেস</div>
-              <div id="hero-mastered" class="text-xl font-extrabold mt-1">০ / ৯৮</div>
-              <div class="text-[11px] text-indigo-100/80">অধ্যায় সম্পন্ন</div>
-            </div>
-          </div>
-        </div>
+    <div class="card section">
+      <h2>ব্যাকআপ</h2>
+      <p>প্রগ্রেস, নোট, লক্ষ্য, টাইমার — JSON।</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn primary" onclick="exportBackup()">Download backup</button>
+        <button class="btn" onclick="document.getElementById('bak').click()">Restore</button>
+        <input id="bak" type="file" accept="application/json" hidden onchange="importBackup(this)">
+        <button class="btn danger" onclick="askReset()">Reset progress</button>
       </div>
-
-      <!-- Stats bar -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-          <div class="text-xs text-slate-400">সর্বমোট অধ্যায়</div>
-          <div id="stat-total" class="text-2xl font-extrabold text-white mt-1">৯৮ টি</div>
-          <div class="text-[11px] text-slate-500">সব বিষয় মিলিয়ে</div>
-        </div>
-        <div class="bg-slate-900/80 border border-emerald-500/20 rounded-2xl p-4">
-          <div class="text-xs text-emerald-400">সম্পন্ন অধ্যায়</div>
-          <div id="stat-mastered" class="text-2xl font-extrabold text-emerald-400 mt-1">০</div>
-          <div id="stat-percent" class="text-[11px] text-emerald-500">০% সম্পন্ন</div>
-        </div>
-        <div class="bg-slate-900/80 border border-sky-500/20 rounded-2xl p-4">
-          <div class="text-xs text-sky-400">চলমান অধ্যায়</div>
-          <div id="stat-reading" class="text-2xl font-extrabold text-sky-400 mt-1">০</div>
-          <div class="text-[11px] text-sky-500">টি অধ্যায়</div>
-        </div>
-        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-          <div class="text-xs text-slate-400">অসম্পূর্ণ অধ্যায়</div>
-          <div id="stat-incomplete" class="text-2xl font-extrabold text-slate-200 mt-1">০</div>
-          <div class="text-[11px] text-slate-500">এখনো শুরু হয়নি</div>
-        </div>
-      </div>
-
-      <!-- Quick status filters -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <button onclick="setStatusFilter('reading')" class="group text-left p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-sky-500/40 transition-all">
-          <div class="text-[11px] font-bold text-sky-400">চলমান</div>
-          <div class="text-sm font-bold text-white mt-2">যে অধ্যায়গুলো পড়ছো</div>
-          <div class="text-[11px] text-slate-500 mt-1">চলমান অধ্যায় দেখুন</div>
-        </button>
-        <button onclick="setStatusFilter('mastered')" class="group text-left p-4 rounded-2xl bg-slate-900/80 border border-emerald-500/20 hover:border-emerald-500/40 transition-all">
-          <div class="text-[11px] font-bold text-emerald-400">সম্পন্ন</div>
-          <div class="text-sm font-bold text-white mt-2">শেষ করা অধ্যায়</div>
-          <div class="text-[11px] text-slate-500 mt-1">সম্পন্ন তালিকা দেখুন</div>
-        </button>
-        <button onclick="setStatusFilter('not_started')" class="group text-left p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 transition-all">
-          <div class="text-[11px] font-bold text-indigo-400">পরবর্তী লক্ষ্য</div>
-          <div class="text-sm font-bold text-white mt-2">অসম্পূর্ণ অধ্যায়</div>
-          <div class="text-[11px] text-slate-500 mt-1">পরের অধ্যায় বেছে নাও</div>
-        </button>
-      </div>
-
-      <!-- Subject Badges Carousel -->
-      <div class="space-y-2">
-        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">বিষয়ভিত্তিক অগ্রগতি ও ফিল্টার</div>
-        <div id="subject-filters" class="flex gap-2 overflow-x-auto pb-1 custom-scroll">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-
-      <!-- Search & Status Filter -->
-      <div class="filter-panel p-4 sm:p-5 rounded-2xl space-y-4">
-        <div class="flex flex-col lg:flex-row gap-3 lg:items-end">
-          <label class="block flex-1">
-            <span class="block text-xs font-bold text-slate-300 mb-2">অধ্যায় খুঁজুন</span>
-            <div class="relative">
-              <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              <input type="search" id="search-input" oninput="handleSearch(this.value)" placeholder="অধ্যায়ের নাম বা বিষয় লিখুন..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
-            </div>
-          </label>
-          <label class="block lg:w-56">
-            <span class="block text-xs font-bold text-slate-300 mb-2">স্ট্যাটাস অনুযায়ী</span>
-            <select id="status-select" onchange="setStatusFilter(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-sm text-slate-200">
-              <option value="all">সব স্ট্যাটাস</option>
-              <option value="not_started">অসম্পূর্ণ</option>
-              <option value="reading">চলমান</option>
-              <option value="mastered">সম্পন্ন</option>
-              <option value="bookmarked">বুকমার্ক করা</option>
-            </select>
-          </label>
-        </div>
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <p class="text-xs text-slate-400">বিষয়, স্ট্যাটাস ও সার্চ একসঙ্গে ব্যবহার করতে পারো।</p>
-          <button type="button" onclick="clearChapterFilters()" class="px-3 py-2 rounded-lg border border-slate-700 text-xs font-bold text-slate-300 hover:bg-slate-800">ফিল্টার মুছুন</button>
-        </div>
-      </div>
-
-      <!-- Chapter Cards Grid -->
-      <div id="chapters-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Rendered by JS -->
-      </div>
-    </section>
-
-    <!-- 4. POMODORO TAB -->
-    <section id="view-pomodoro" class="hidden max-w-md mx-auto space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center space-y-6">
-        <div class="flex justify-center gap-2">
-          <button onclick="setPomodoroMode('study')" id="pomo-study-btn" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white">পড়াশোনা (২৫ মি.)</button>
-          <button onclick="setPomodoroMode('break')" id="pomo-break-btn" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400">বিরতি (৫ মি.)</button>
-        </div>
-
-        <div class="text-6xl font-extrabold font-mono text-white tracking-widest" id="pomo-display">
-          25:00
-        </div>
-
-        <div class="flex justify-center gap-4">
-          <button onclick="togglePomodoro()" id="pomo-start-btn" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-2xl shadow-xl shadow-indigo-600/30">
-            শুরু করুন
-          </button>
-          <button onclick="resetPomodoro()" class="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl">
-            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-          </button>
-        </div>
-
-        <div class="pt-4 border-t border-slate-800 text-xs text-slate-400">
-          আজকের মোট সেশন: <span id="pomo-session-count" class="text-emerald-400 font-bold">০</span> টি
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. GOALS TAB -->
-    <section id="view-goals" class="hidden max-w-2xl mx-auto space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-        <h2 class="text-lg font-bold text-white flex items-center gap-2">
-          <i data-lucide="target" class="text-violet-400"></i> আজকের পড়ার লক্ষ্য ও চেকলিস্ট
-        </h2>
-        <div class="flex gap-2">
-          <input type="text" id="goal-input" onkeydown="if(event.key==='Enter') addGoal()" placeholder="আজকে কী পড়তে চান লিখুন..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-200">
-          <button onclick="addGoal()" class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs rounded-xl">
-            যুক্ত করুন
-          </button>
-        </div>
-        <div id="goals-list" class="space-y-2 pt-2"></div>
-      </div>
-    </section>
-
-    <!-- 6. PLANNER, REVISION, ANALYTICS AND BACKUP -->
-    <section id="view-planner" class="hidden max-w-5xl mx-auto space-y-5">
-      <div class="rounded-3xl bg-gradient-to-br from-violet-700 via-indigo-700 to-sky-600 p-6 sm:p-8 text-white shadow-xl">
-        <div class="text-xs font-bold text-white/75 mb-2">SMART PREPARATION PLANNER</div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold">পরীক্ষার প্রস্তুতি, এবার পরিকল্পিতভাবে</h2>
-        <p class="text-sm text-white/80 mt-2">পরীক্ষার তারিখ, দৈনিক পড়ার লক্ষ্য ও নিজের অগ্রগতি এক জায়গায় রাখো।</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-          <label class="block rounded-2xl bg-white/10 border border-white/20 p-4">
-            <span class="block text-xs text-white/80 mb-2">SSC পরীক্ষার তারিখ (নিজে সেট করো)</span>
-            <input id="exam-date" type="date" onchange="savePlannerSettings()" class="w-full rounded-xl bg-slate-950/70 border border-white/20 text-white px-3 py-2 text-sm">
-            <span id="exam-countdown" class="block text-sm font-bold mt-2">পরীক্ষার তারিখ সেট করো</span>
-          </label>
-          <label class="block rounded-2xl bg-white/10 border border-white/20 p-4">
-            <span class="block text-xs text-white/80 mb-2">দৈনিক ফোকাস লক্ষ্য (মিনিট)</span>
-            <div class="flex gap-2"><input id="daily-focus-goal" type="number" min="15" max="1440" step="15" value="120" onchange="savePlannerSettings()" class="min-w-0 flex-1 rounded-xl bg-slate-950/70 border border-white/20 text-white px-3 py-2 text-sm"><span class="self-center text-xs">মিনিট</span></div>
-            <div id="today-focus-progress" class="text-sm font-bold mt-2">আজকের ফোকাস: ০ মিনিট</div>
-          </label>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 gap-4">
-        <div class="rounded-2xl bg-slate-900 border border-slate-800 p-5">
-          <div class="flex items-center justify-between gap-3"><h3 class="font-bold text-white">গত ৭ দিনের ফোকাস</h3><span class="text-xs text-slate-500">Pomodoro সেশন</span></div>
-          <div id="weekly-analytics" class="mt-5 space-y-3"></div>
-          <div id="analytics-summary" class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400"></div>
-        </div>
-      </div>
-
-      <div class="rounded-2xl bg-slate-900 border border-slate-800 p-5">
-        <h3 class="font-bold text-white">ডেটা ব্যাকআপ ও রিস্টোর</h3>
-        <p class="text-xs text-slate-400 mt-1 mb-4">অধ্যায়ের অগ্রগতি, নোট, লক্ষ্য, টাইমার হিস্ট্রি ও সেটিংস JSON ফাইলে সংরক্ষণ করো। ব্যাকআপ ফাইল ব্যক্তিগতভাবে নিরাপদে রাখো।</p>
-        <div class="flex flex-wrap gap-2">
-          <button onclick="exportBackup()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">⬇ ব্যাকআপ ডাউনলোড</button>
-          <button onclick="document.getElementById('backup-file-input').click()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold">⬆ ব্যাকআপ রিস্টোর</button>
-          <input id="backup-file-input" type="file" accept="application/json,.json" class="hidden" onchange="importBackupFile(this)">
-        </div>
-        <p class="text-[11px] text-slate-500 mt-3">রিস্টোর করলে বর্তমান ডেটা ব্যাকআপ ফাইলের ডেটা দিয়ে প্রতিস্থাপিত হবে।</p>
-      </div>
-    </section>
-  </main>
-
-  <!-- CHAPTER DETAIL MODAL -->
-  <div id="chapter-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-      <div class="p-5 border-b border-slate-800 flex items-start justify-between">
-        <div>
-          <span id="modal-subject-tag" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30"></span>
-          <h3 id="modal-title" class="text-xl font-bold text-white mt-1"></h3>
-        </div>
-        <button onclick="closeChapterModal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="p-5 overflow-y-auto space-y-5 text-xs text-slate-300 flex-1 custom-scroll">
-        <!-- Status Changer -->
-        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between flex-wrap gap-2">
-          <span class="text-slate-400">প্রিপারেশন স্ট্যাটাস:</span>
-          <div class="flex flex-wrap gap-1.5" id="modal-status-buttons">
-            <button onclick="setModalChapterStatus('not_started')" class="px-3 py-1.5 rounded-lg border border-slate-800 text-slate-400 text-[11px]" data-mstatus="not_started">অসম্পূর্ণ</button>
-            <button onclick="setModalChapterStatus('reading')" class="px-3 py-1.5 rounded-lg border border-slate-800 text-sky-400 text-[11px]" data-mstatus="reading">চলমান</button>
-            <button onclick="setModalChapterStatus('mastered')" class="px-3 py-1.5 rounded-lg border border-slate-800 text-emerald-400 text-[11px]" data-mstatus="mastered">সম্পন্ন</button>
-          </div>
-        </div>
-
-        <!-- Summary -->
-        <div class="space-y-1">
-          <div class="font-bold text-slate-200">অধ্যায় সারসংক্ষেপ:</div>
-          <p id="modal-summary" class="leading-relaxed text-slate-400"></p>
-        </div>
-
-
-        <!-- Notes -->
-        <div class="space-y-1">
-          <div class="font-bold text-slate-200">ব্যক্তিগত নোট (স্বয়ংক্রিয় সেভ):</div>
-          <textarea id="modal-notes" oninput="saveModalNotes(this.value)" rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="এই অধ্যায়ের গুরুত্বপূর্ণ নোট বা ট্রিকস এখানে লিখে রাখুন..."></textarea>
-        </div>
-      </div>
-
-      <div class="p-4 border-t border-slate-800 bg-slate-950 flex justify-end">
-        <button onclick="closeChapterModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl">
-          সম্পন্ন
-        </button>
-      </div>
+    </div>
+  </section>
+  <section class="panel" id="panel-history">
+    <div class="card section">
+      <h2>Study history</h2>
+      <p id="histSum">ফোকাস মিনিট</p>
+      <div class="canvaswrap"><canvas id="hist"></canvas></div>
+    </div>
+  </section>
+  <footer>© ২০২৬ SSC StudyHub · @turabi_alam</footer>
+</div>
+<div class="pomo" id="pomo">
+  <div class="pomo-box">
+    <div style="display:flex;justify-content:space-between"><strong id="pomoModeLabel">Focus</strong><button class="btn" onclick="closePomo()">Close</button></div>
+    <div class="pomo-clock" id="clock">25:00</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px">
+      <select class="select" id="pomoSub" style="max-width:220px" onchange="fillCh()"></select>
+      <select class="select" id="pomoCh" style="max-width:220px"></select>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <label class="sub">Focus <input id="focusMin" type="number" min="1" max="180" value="25" style="width:64px" class="input"></label>
+      <label class="sub">Break <input id="breakMin" type="number" min="1" max="60" value="5" style="width:64px" class="input"></label>
+    </div>
+    <div class="pomo-controls">
+      <button class="btn primary" id="playBtn" onclick="togglePomo()">Start</button>
+      <button class="btn" onclick="resetPomo()">Reset</button>
+      <button class="btn" id="alertBtn" onclick="enableAlert()">Enable alert</button>
+    </div>
+    <p class="sub" style="text-align:center;margin-top:10px">Session <span id="sessN">1</span> · Focus শেষ হলে break, break শেষ হলে পরের focus নিজে চালু হয়।</p>
+  </div>
+</div>
+<div class="modal" id="noteModal">
+  <div class="modalbox">
+    <h3 id="noteTitle">Note</h3>
+    <p class="sub" id="noteSub"></p>
+    <textarea class="input" id="noteBox" rows="6" style="margin-top:12px" placeholder="নোট..."></textarea>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+      <button class="btn" onclick="closeNote()">Cancel</button>
+      <button class="btn primary" onclick="saveNote()">Save</button>
     </div>
   </div>
+</div>
+<div class="modal" id="confirmModal">
+  <div class="modalbox">
+    <h3 id="cTitle">নিশ্চিত?</h3>
+    <p class="sub" id="cMsg"></p>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+      <button class="btn" onclick="closeConfirm()">বাতিল</button>
+      <button class="btn danger" id="cYes">হ্যাঁ</button>
+    </div>
+  </div>
+</div>
+<button class="float" id="float" onclick="openPomo()">🍅</button>
+<div class="toast" id="toast"></div>
+<script>
+const SUBJECTS = [
+  {
+    "id": "physics",
+    "name": "পদার্থবিজ্ঞান",
+    "icon": "⚛️",
+    "chapters": [
+      {"id": "physics-1", "name": "ভৌত রাশি এবং পরিমাপ"},
+      {"id": "physics-2", "name": "গতি"},
+      {"id": "physics-3", "name": "বল"},
+      {"id": "physics-4", "name": "কাজ, শক্তি ও ক্ষমতা"},
+      {"id": "physics-5", "name": "পদার্থের অবস্থা ও চাপ"},
+      {"id": "physics-6", "name": "বস্তুর ওপর তাপের প্রভাব"},
+      {"id": "physics-7", "name": "তরঙ্গ ও শব্দ"},
+      {"id": "physics-8", "name": "আলোর প্রতিফলন"},
+      {"id": "physics-9", "name": "আলোর প্রতিসরণ"},
+      {"id": "physics-10", "name": "স্থির বিদ্যুৎ"},
+      {"id": "physics-11", "name": "চল বিদ্যুৎ"},
+      {"id": "physics-12", "name": "বিদ্যুতের চৌম্বক ক্রিয়া"},
+      {"id": "physics-13", "name": "আধুনিক পদার্থবিজ্ঞান ও ইলেকট্রনিক্স"},
+      {"id": "physics-14", "name": "জীবন বাঁচাতে পদার্থবিজ্ঞান"}
+    ]
+  },
+  {
+    "id": "chemistry",
+    "name": "রসায়ন",
+    "icon": "🧪",
+    "chapters": [
+      {"id": "chemistry-1", "name": "রসায়নের ধারণা"},
+      {"id": "chemistry-2", "name": "পদার্থের অবস্থা"},
+      {"id": "chemistry-3", "name": "পদার্থের গঠন"},
+      {"id": "chemistry-4", "name": "পর্যায় সারণি"},
+      {"id": "chemistry-5", "name": "রাসায়নিক বন্ধন"},
+      {"id": "chemistry-6", "name": "মোলের ধারণা ও রাসায়নিক গণনা"},
+      {"id": "chemistry-7", "name": "রাসায়নিক বিক্রিয়া"},
+      {"id": "chemistry-8", "name": "রসায়ন ও শক্তি"},
+      {"id": "chemistry-9", "name": "এসিড-ক্ষার সমতা"},
+      {"id": "chemistry-10", "name": "খনিজ সম্পদ: ধাতু-অধাতু"},
+      {"id": "chemistry-11", "name": "খনিজ সম্পদ: জীবাশ্ম"},
+      {"id": "chemistry-12", "name": "আমাদের জীবনে রসায়ন"}
+    ]
+  },
+  {
+    "id": "general_math",
+    "name": "সাধারণ গণিত",
+    "icon": "➗",
+    "chapters": [
+      {"id": "general_math-1", "name": "বাস্তব সংখ্যা"},
+      {"id": "general_math-2", "name": "সেট ও ফাংশন"},
+      {"id": "general_math-3", "name": "বীজগাণিতিক রাশি"},
+      {"id": "general_math-4", "name": "সূচক ও লগারিদম"},
+      {"id": "general_math-5", "name": "একচলকবিশিষ্ট সমীকরণ"},
+      {"id": "general_math-6", "name": "রেখা, কোণ ও ত্রিভুজ"},
+      {"id": "general_math-7", "name": "ব্যবহারিক জ্যামিতি"},
+      {"id": "general_math-8", "name": "বৃত্ত"},
+      {"id": "general_math-9", "name": "ত্রিকোণমিতিক অনুপাত"},
+      {"id": "general_math-10", "name": "দূরত্ব ও উচ্চতা"},
+      {"id": "general_math-11", "name": "বীজগাণিতিক অনুপাত ও সমানুপাত"},
+      {"id": "general_math-12", "name": "দুই চলকবিশিষ্ট সরল সহসমীকরণ"},
+      {"id": "general_math-13", "name": "সসীম ধারা"},
+      {"id": "general_math-14", "name": "অনুপাত, সদৃশতা ও প্রতিসমতা"},
+      {"id": "general_math-15", "name": "ক্ষেত্রফল সম্পর্কিত উপপাদ্য ও সম্পাদ্য"},
+      {"id": "general_math-16", "name": "পরিমিতি"},
+      {"id": "general_math-17", "name": "পরিসংখ্যান"}
+    ]
+  },
+  {
+    "id": "higher_math",
+    "name": "উচ্চতর গণিত",
+    "icon": "📐",
+    "chapters": [
+      {"id": "higher_math-1", "name": "সেট ও ফাংশন"},
+      {"id": "higher_math-2", "name": "বীজগাণিতিক রাশি"},
+      {"id": "higher_math-3", "name": "জ্যামিতি"},
+      {"id": "higher_math-4", "name": "জ্যামিতিক অঙ্কন"},
+      {"id": "higher_math-5", "name": "সমীকরণ"},
+      {"id": "higher_math-6", "name": "অসমতা"},
+      {"id": "higher_math-7", "name": "অসীম ধারা"},
+      {"id": "higher_math-8", "name": "ত্রিকোণমিতি"},
+      {"id": "higher_math-9", "name": "সূচকীয় ও লগারিদমীয় ফাংশন"},
+      {"id": "higher_math-10", "name": "দ্বিপদী বিস্তৃতি"},
+      {"id": "higher_math-11", "name": "স্থানাঙ্ক জ্যামিতি"},
+      {"id": "higher_math-12", "name": "সমতলীয় ভেক্টর"},
+      {"id": "higher_math-13", "name": "ঘন জ্যামিতি"},
+      {"id": "higher_math-14", "name": "সম্ভাবনা"}
+    ]
+  },
 
-  <!-- COMPLETE DATASET & JAVASCRIPT SCRIPT -->
-  <script>
-    // 1. DATASET OF 8 SUBJECTS & ALL 98 CHAPTERS
-    const SUBJECTS = [
-      {
-        id: 'physics',
-        name: 'পদার্থবিজ্ঞান',
-        color: 'text-cyan-400',
-        chapters: [
-          { id: 'physics-1', name: 'ভৌত রাশি এবং পরিমাপ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-2', name: 'গতি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-3', name: 'বল', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-4', name: 'কাজ, শক্তি ও ক্ষমতা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-5', name: 'পদার্থের অবস্থা ও চাপ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-6', name: 'বস্তুর ওপর তাপের প্রভাব', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-7', name: 'তরঙ্গ ও শব্দ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-8', name: 'আলোর প্রতিফলন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-9', name: 'আলোর প্রতিসরণ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-10', name: 'স্থির বিদ্যুৎ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-11', name: 'চল বিদ্যুৎ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-12', name: 'বিদ্যুতের চৌম্বক ক্রিয়া', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-13', name: 'আধুনিক পদার্থবিজ্ঞান ও ইলেকট্রনিক্স', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'physics-14', name: 'জীবন বাঁচাতে পদার্থবিজ্ঞান', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] }
-        ]
-      },
-      {
-        id: 'chemistry',
-        name: 'রসায়ন',
-        color: 'text-emerald-400',
-        chapters: [
-          { id: 'chemistry-1', name: 'রসায়নের ধারণা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-2', name: 'পদার্থের অবস্থা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-3', name: 'পদার্থের গঠন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-4', name: 'পর্যায় সারণি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-5', name: 'রাসায়নিক বন্ধন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-6', name: 'মোলের ধারণা ও রাসায়নিক গণনা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-7', name: 'রাসায়নিক বিক্রিয়া', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-8', name: 'রসায়ন ও শক্তি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-9', name: 'এসিড-ক্ষার সমতা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-10', name: 'খনিজ সম্পদ: ধাতু-অধাতু', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-11', name: 'খনিজ সম্পদ: জীবাশ্ম', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'chemistry-12', name: 'আমাদের জীবনে রসায়ন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] }
-        ]
-      },
-      {
-        id: 'general_math',
-        name: 'সাধারণ গণিত',
-        color: 'text-amber-400',
-        chapters: [
-          { id: 'general_math-1', name: 'বাস্তব সংখ্যা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-2', name: 'সেট ও ফাংশন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-3', name: 'বীজগাণিতিক রাশি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-4', name: 'সূচক ও লগারিদম', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-5', name: 'একচলকবিশিষ্ট সমীকরণ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-6', name: 'রেখা, কোণ ও ত্রিভুজ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-7', name: 'ব্যবহারিক জ্যামিতি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-8', name: 'বৃত্ত', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-9', name: 'ত্রিকোণমিতিক অনুপাত', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-10', name: 'দূরত্ব ও উচ্চতা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-11', name: 'বীজগাণিতিক অনুপাত ও সমানুপাত', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-12', name: 'দুই চলকবিশিষ্ট সরল সহসমীকরণ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-13', name: 'সসীম ধারা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-14', name: 'অনুপাত, সদৃশতা ও প্রতিসমতা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-15', name: 'ক্ষেত্রফল সম্পর্কিত উপপাদ্য ও সম্পাদ্য', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-16', name: 'পরিমিতি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'general_math-17', name: 'পরিসংখ্যান', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] }
-        ]
-      },
-      {
-        id: 'higher_math',
-        name: 'উচ্চতর গণিত',
-        color: 'text-purple-400',
-        chapters: [
-          { id: 'higher_math-1', name: 'সেট ও ফাংশন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-2', name: 'বীজগাণিতিক রাশি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-3', name: 'জ্যামিতি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-4', name: 'জ্যামিতিক অঙ্কন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-5', name: 'সমীকরণ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-6', name: 'অসমতা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-7', name: 'অসীম ধারা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-8', name: 'ত্রিকোণমিতি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-9', name: 'সূচকীয় ও লগারিদমীয় ফাংশন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-10', name: 'দ্বিপদী বিস্তৃতি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-11', name: 'স্থানাঙ্ক জ্যামিতি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-12', name: 'সমতলীয় ভেক্টর', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-13', name: 'ঘন জ্যামিতি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'higher_math-14', name: 'সম্ভাবনা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] }
-        ]
-      },
-      {
-        id: 'biology',
-        name: 'জীববিজ্ঞান',
-        color: 'text-green-400',
-        chapters: [
-          { id: 'biology-1', name: 'জীবন পাঠ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-2', name: 'জীবকোষ ও টিস্যু', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-3', name: 'কোষ বিভাজন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-4', name: 'জীবনীশক্তি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-5', name: 'খাদ্য, পুষ্টি এবং পরিপাক', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-6', name: 'জীবে পরিবহন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-7', name: 'গ্যাসীয় বিনিময়', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-8', name: 'রেচন প্রক্রিয়া', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-9', name: 'দৃঢ়তা প্রদান ও চলন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-10', name: 'সমন্বয়', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-11', name: 'জীবের প্রজনন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-12', name: 'জীবের বংশগতি ও বিবর্তন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-13', name: 'জীবের পরিবেশ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'biology-14', name: 'জীবপ্রযুক্তি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] }
-        ]
-      },
-      {
-        id: 'bgs',
-        name: 'বাংলাদেশ ও বিশ্বপরিচয়',
-        color: 'text-rose-400',
-        chapters: [
-          { id: 'bgs-1', name: 'পূর্ব বাংলার আন্দোলন ও জাতীয়তাবাদের উত্থান (১৯৪৭-১৯৭০)', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-2', name: 'স্বাধীন বাংলাদেশ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-3', name: 'সৌরজগৎ ও ভূমণ্ডল', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-4', name: 'বাংলাদেশের ভূপ্রকৃতি ও জলবায়ু', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-5', name: 'বাংলাদেশের নদ-নদী ও প্রাকৃতিক সম্পদ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-6', name: 'রাষ্ট্র, নাগরিকতা ও আইন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-7', name: 'বাংলাদেশ সরকারের অঙ্গসমূহ ও প্রশাসন ব্যবস্থা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-8', name: 'বাংলাদেশের গণতন্ত্র ও নির্বাচন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-9', name: 'জাতিসংঘ ও বাংলাদেশ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-10', name: 'টেকসই উন্নয়ন অভীষ্ট (SDG)', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-11', name: 'জাতীয় সম্পদ ও অর্থনৈতিক ব্যবস্থা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-12', name: 'অর্থনৈতিক নির্দেশকসমূহ ও বাংলাদেশের অর্থনীতির প্রকৃতি', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-13', name: 'বাংলাদেশ সরকারের অর্থ ও ব্যাংক ব্যবস্থা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-14', name: 'বাংলাদেশের সামাজিক পরিবর্তন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-15', name: 'বাংলাদেশের সামাজিক সমস্যা ও এর প্রতিকার', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'bgs-16', name: 'বাংলাদেশের সাংস্কৃতিক বৈচিত্র্য', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] }
-        ]
-      },
-      {
-        id: 'ict',
-        name: 'তথ্য ও যোগাযোগ প্রযুক্তি',
-        color: 'text-sky-400',
-        chapters: [
-          { id: 'ict-1', name: 'তথ্য ও যোগাযোগ প্রযুক্তি এবং আমাদের বাংলাদেশ', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'ict-2', name: 'কম্পিউটার ও কম্পিউটার ব্যবহারকারীর নিরাপত্তা', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'ict-3', name: 'আমার শিক্ষায় ইন্টারনেট', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'ict-4', name: 'আমার লেখালেখি ও হিসাব', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'ict-5', name: 'মাল্টিমিডিয়া ও গ্রাফিক্স', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'ict-6', name: 'ডাটাবেজ এর ব্যবহার', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] }
-        ]
-      },
-      {
-        id: 'islamic_studies',
-        name: 'ইসলাম ও নৈতিক শিক্ষা',
-        color: 'text-teal-400',
-        chapters: [
-          { id: 'islamic_studies-1', name: 'আকাইদ ও নৈতিক জীবন', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'islamic_studies-2', name: 'শরীয়তের উৎস', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'islamic_studies-3', name: 'ইবাদত', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'islamic_studies-4', name: 'আখলাক', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] },
-          { id: 'islamic_studies-5', name: 'আদর্শ জীবনচরিত', summary: 'এই অধ্যায়ের পড়া ও ব্যক্তিগত নোট এখানে ট্র্যাক করুন।', formulas: [] }
-        ]
-      }
-    ];
-
-    // STATE
-    // Safe storage reads prevent a damaged localStorage value from breaking app startup.
-    function readStoredJSON(key, fallback) {
-      try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
-      catch (error) { console.warn('Stored data could not be read:', key, error); return fallback; }
-    }
-    let progress = readStoredJSON('ssc_progress_standalone_v2', {});
-    // Migrate saved legacy statuses without touching subject/chapter names or notes.
-    if (progress && typeof progress === 'object') {
-      Object.values(progress).forEach(p => {
-        if (!p || typeof p !== 'object') return;
-        if (p.status === 'mastered') p.status = 'mastered';
-        else if (p.status === 'reading') p.status = 'reading';
-        else p.status = 'not_started';
-        delete p.reviewDue;
-      });
-    }
-    if (!progress || typeof progress !== 'object' || Array.isArray(progress)) progress = {};
-    const TOTAL_CHAPTERS = SUBJECTS.reduce((sum, subject) => sum + subject.chapters.length, 0);
-    let studySecondsToday = 0;
-    let pomoMode = 'study';
-    let pomoEndsAt = null;
-    let pomoRunning = false;
-    let pomoTickHandle = null;
-    let pomoHistory = readStoredJSON('ssc_pomo_history', {});
-    if (!pomoHistory || typeof pomoHistory !== 'object' || Array.isArray(pomoHistory)) pomoHistory = {};
-    let currentSubjectFilter = 'all';
-    let currentStatusFilter = 'all';
-    let currentSearch = '';
-    let activeModalChapter = null;
-    let goals = readStoredJSON('ssc_goals_standalone', []);
-    if (!Array.isArray(goals)) goals = [];
-    let pendingAppConfirmation = null;
-
-    // Local calendar date key (not UTC): keeps daily goals/history aligned with the user's day.
-    function localDateKey(date = new Date()) {
-      const d = date instanceof Date ? date : new Date(date);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    // Icons use Lucide when its CDN is available, and readable glyph fallbacks otherwise.
-    function renderIcons() {
-      if (window.lucide && typeof window.lucide.createIcons === 'function') {
-        try { window.lucide.createIcons(); return; } catch (error) { /* use fallback below */ }
-      }
-      const symbols = { 'book-open':'▤', 'check-circle':'✓', sun:'☼', moon:'☾', 'rotate-ccw':'↻', layers:'▦', clock:'◷', target:'◎', 'calendar-check':'▣', sparkles:'✦', search:'⌕', timer:'◴', x:'×', 'chevron-down':'⌄', 'chevron-up':'⌃', trash:'⌫', plus:'+', check:'✓', 'bookmark':'☆', 'chart-no-axes-column':'▥' };
-      document.querySelectorAll('i[data-lucide]').forEach(el => {
-        if (el.dataset.fallbackRendered === '1') return;
-        const name = el.getAttribute('data-lucide');
-        el.textContent = symbols[name] || '•';
-        el.classList.add('icon-fallback');
-        el.dataset.fallbackRendered = '1';
-        el.setAttribute('aria-hidden', 'true');
-      });
-    }
-
-    // Save Progress to localStorage
-    function escapeHTML(value) {
-      return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-    }
-
-    function showToast(message) {
-      const el = document.getElementById('app-toast');
-      if (!el) return;
-      el.textContent = message;
-      el.classList.add('show');
-      clearTimeout(showToast._timer);
-      showToast._timer = setTimeout(() => el.classList.remove('show'), 2600);
-    }
-
-    function saveProgress() {
-      try { localStorage.setItem('ssc_progress_standalone_v2', JSON.stringify(progress)); }
-      catch (error) { showToast('ডিভাইসে জায়গা নেই—প্রগ্রেস সেভ হয়নি।'); }
-      updateStats();
-    }
-
-    // Theme
-    function applyTheme(theme) {
-      const isLight = theme === 'light';
-      document.body.classList.toggle('light-mode', isLight);
-      try { localStorage.setItem('ssc_theme', theme); } catch (error) { /* theme still applies for this session */ }
-      const btn = document.getElementById('theme-toggle');
-      if (btn) {
-        btn.innerHTML = `<i data-lucide="${isLight ? 'moon' : 'sun'}" class="w-4 h-4"></i>`;
-        btn.title = isLight ? 'ডার্ক মোড' : 'লাইট মোড';
-      }
-      const themeMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeMeta) themeMeta.setAttribute('content', isLight ? '#f5f7fb' : '#090f1d');
-      renderIcons();
-    }
-
-    function toggleTheme() {
-      applyTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light');
-    }
-
-    function focusSearch() {
-      const input = document.getElementById('search-input');
-      if (input) { input.focus(); input.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    }
-
-    // Initialize View
-    function init() {
-      applyTheme(localStorage.getItem('ssc_theme') || 'dark');
-      renderSubjectFilters();
-      const chapterTab = document.getElementById('tab-btn-chapters');
-      if (chapterTab) chapterTab.innerHTML = `<i data-lucide="layers" class="w-4 h-4"></i> অধ্যায় ট্র্যাকার (${TOTAL_CHAPTERS.toLocaleString('bn-BD')})`;
-      const totalStat = document.querySelector('#view-chapters .grid.grid-cols-2.sm\\:grid-cols-4 > div:first-child .text-2xl');
-      if (totalStat) totalStat.textContent = `${TOTAL_CHAPTERS.toLocaleString('bn-BD')} টি`;
-      renderChapters();
-      renderGoals();
-      loadPlannerSettings();
-      renderPlanner();
-      updateStats();
-      restorePomodoro();
-      const floating = document.getElementById('study-floating');
-      if (floating) floating.addEventListener('click', openFloatingTimer);
-      renderIcons();
-      if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
-      }
-
-      // Escape closes overlays; clicks inside the modal do not close it accidentally.
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { closeChapterModal(); closeResetModal(); closeAppConfirmation(); }
-      });
-      const resetModal = document.getElementById('reset-modal');
-      if (resetModal) resetModal.addEventListener('click', e => {
-        if (e.target.id === 'reset-modal') closeResetModal();
-      });
-      const confirmModal = document.getElementById('confirm-modal');
-      if (confirmModal) confirmModal.addEventListener('click', e => {
-        if (e.target.id === 'confirm-modal') closeAppConfirmation();
-      });
-    }
-
-    // Switch Tabs
-    function switchTab(tabId) {
-      ['chapters', 'pomodoro', 'goals', 'planner'].forEach(t => {
-        document.getElementById(`view-${t}`).classList.add('hidden');
-        const btn = document.getElementById(`tab-btn-${t}`);
-        btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-md');
-        btn.classList.add('text-slate-400');
-      });
-      document.getElementById(`view-${tabId}`).classList.remove('hidden');
-      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-      activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
-      activeBtn.classList.remove('text-slate-400');
-      renderIcons();
-    }
-
-    // Render subject filters with live completed/total progress for every subject.
-    function renderSubjectFilters() {
-      const container = document.getElementById('subject-filters');
-      const allDone = SUBJECTS.reduce((n, s) => n + s.chapters.filter(c => progress[c.id]?.status === 'mastered').length, 0);
-      const subjectButton = (id, name, total, done, pct, selected) => `
-        <button type="button" onclick="setSubjectFilter('${id}')" class="px-3 py-2.5 rounded-xl border text-xs transition-all ${selected ? 'bg-indigo-600 text-white border-indigo-400 shadow-lg shadow-indigo-900/20' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-indigo-500/50'}">
-          <span class="block font-bold">${name}</span>
-          <span class="block mt-1 text-[10px] ${selected ? 'text-indigo-100' : 'text-slate-500'}">${done.toLocaleString('bn-BD')} / ${total.toLocaleString('bn-BD')} সম্পন্ন · ${pct}%</span>
-          <span class="chapter-progress-track block mt-2"><span class="chapter-progress-fill block ${selected ? 'bg-white' : 'bg-indigo-500'}" style="width:${pct}%"></span></span>
-        </button>`;
-      container.innerHTML = subjectButton('all', 'সব বিষয়', TOTAL_CHAPTERS, allDone, TOTAL_CHAPTERS ? Math.round(allDone / TOTAL_CHAPTERS * 100) : 0, currentSubjectFilter === 'all') +
-        SUBJECTS.map(s => {
-          const done = s.chapters.filter(c => progress[c.id]?.status === 'mastered').length;
-          const pct = s.chapters.length ? Math.round(done / s.chapters.length * 100) : 0;
-          return subjectButton(s.id, s.name, s.chapters.length, done, pct, currentSubjectFilter === s.id);
-        }).join('');
-    }
-
-    function setSubjectFilter(id) {
-      currentSubjectFilter = id;
-      renderSubjectFilters();
-      renderChapters();
-    }
-
-    function setStatusFilter(status) {
-      currentStatusFilter = status || 'all';
-      const select = document.getElementById('status-select');
-      if (select) select.value = currentStatusFilter;
-      renderChapters();
-    }
-
-    function handleSearch(q) {
-      currentSearch = String(q || '').trim().toLocaleLowerCase('bn-BD');
-      renderChapters();
-    }
-
-    function clearChapterFilters() {
-      currentSubjectFilter = 'all';
-      currentStatusFilter = 'all';
-      currentSearch = '';
-      const search = document.getElementById('search-input');
-      if (search) search.value = '';
-      const select = document.getElementById('status-select');
-      if (select) select.value = 'all';
-      renderSubjectFilters();
-      renderChapters();
-    }
-
-    // The chapter status cycles in the exact requested order.
-    function cycleChapterStatus(chapterId) {
-      const current = progress[chapterId]?.status || 'not_started';
-      const next = current === 'not_started' ? 'reading' : current === 'reading' ? 'mastered' : 'not_started';
-      if (!progress[chapterId]) progress[chapterId] = { notes: '', bookmarked: false };
-      progress[chapterId].status = next;
-      delete progress[chapterId].reviewDue;
-      saveProgress();
-      renderSubjectFilters();
-      renderChapters();
-      updateStats();
-      if (activeModalChapter && activeModalChapter.id === chapterId) updateModalStatusUI(next);
-      showToast(next === 'not_started' ? 'স্ট্যাটাস: অসম্পূর্ণ' : next === 'reading' ? 'স্ট্যাটাস: চলমান' : 'স্ট্যাটাস: সম্পন্ন');
-    }
-
-    // Render Chapter Cards.
-    function renderChapters() {
-      const grid = document.getElementById('chapters-grid');
-      if (!grid) return;
-      const chaptersList = [];
-      SUBJECTS.forEach(sub => {
-        if (currentSubjectFilter === 'all' || currentSubjectFilter === sub.id) {
-          sub.chapters.forEach((c, idx) => {
-            const p = progress[c.id] || { status: 'not_started', notes: '', bookmarked: false };
-            const searchText = `${c.name} ${sub.name} ${idx + 1}`.toLocaleLowerCase('bn-BD');
-            const matchSearch = !currentSearch || searchText.includes(currentSearch);
-            const status = ['not_started', 'reading', 'mastered'].includes(p.status) ? p.status : 'not_started';
-            const matchStatus = currentStatusFilter === 'all' ||
-              (currentStatusFilter === 'not_started' && status === 'not_started') ||
-              (currentStatusFilter === 'reading' && status === 'reading') ||
-              (currentStatusFilter === 'mastered' && status === 'mastered') ||
-              (currentStatusFilter === 'bookmarked' && !!p.bookmarked);
-            if (matchSearch && matchStatus) chaptersList.push({ ...c, subjectName: sub.name, subjectId: sub.id, chapterNum: idx + 1, prog: { ...p, status } });
-          });
-        }
-      });
-
-      if (!chaptersList.length) {
-        grid.innerHTML = '<div class="col-span-full text-center py-12 px-4 rounded-2xl border border-dashed border-slate-700 text-slate-500"><div class="text-2xl mb-2">⌕</div><p class="font-bold text-sm">কোনো অধ্যায় পাওয়া যায়নি</p><p class="text-xs mt-1">সার্চের শব্দ বা ফিল্টার পরিবর্তন করে দেখুন।</p></div>';
-        return;
-      }
-
-      grid.innerHTML = chaptersList.map(item => {
-        const statusInfo = item.prog.status === 'reading'
-          ? { text: 'চলমান', color: 'bg-sky-500/10 text-sky-400 border-sky-500/30', next: 'সম্পন্ন করুন', nextColor: 'bg-sky-500/10 text-sky-300 border-sky-500/30' }
-          : item.prog.status === 'mastered'
-          ? { text: 'সম্পন্ন', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30', next: 'আবার অসম্পূর্ণ করুন', nextColor: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' }
-          : { text: 'অসম্পূর্ণ', color: 'bg-slate-800 text-slate-300 border-slate-700', next: 'পড়া শুরু করুন', nextColor: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30' };
-        const pct = item.prog.status === 'mastered' ? 100 : item.prog.status === 'reading' ? 50 : 0;
-        return `
-          <article class="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-5 transition-all flex flex-col justify-between group">
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-3">
-                <span class="text-[11px] font-semibold px-2 py-1 rounded-full bg-slate-800 text-slate-300">${escapeHTML(item.subjectName)} · অধ্যায় ${item.chapterNum.toLocaleString('bn-BD')}</span>
-                <span class="text-[10px] font-bold px-2 py-1 rounded-md border ${statusInfo.color}">${statusInfo.text}</span>
-              </div>
-              <button type="button" onclick="openChapterModal('${escapeHTML(item.id)}', '${escapeHTML(item.subjectName)}')" class="text-left w-full text-base font-bold text-white hover:text-indigo-400 transition-colors mb-2">${escapeHTML(item.name)}</button>
-              <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4">${escapeHTML(item.summary || '')}</p>
-              <div class="chapter-progress-track mb-2"><div class="chapter-progress-fill ${item.prog.status === 'mastered' ? 'bg-emerald-500' : item.prog.status === 'reading' ? 'bg-sky-500' : 'bg-slate-600'}" style="width:${pct}%"></div></div>
-              <div class="flex justify-between text-[10px] text-slate-500 mb-4"><span>অধ্যায়ের অগ্রগতি</span><span>${pct.toLocaleString('bn-BD')}%</span></div>
-            </div>
-            <div class="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
-              <button type="button" onclick="cycleChapterStatus('${escapeHTML(item.id)}')" class="chapter-status-action px-3 py-2 rounded-xl border ${statusInfo.nextColor} text-[11px] font-bold">${statusInfo.next}</button>
-              <button type="button" onclick="toggleBookmark('${escapeHTML(item.id)}')" class="px-2 py-2 rounded-lg border border-slate-700 text-[11px] ${item.prog.bookmarked ? 'text-amber-300 bg-amber-500/10' : 'text-slate-500'}" aria-label="বুকমার্ক">${item.prog.bookmarked ? '★ সেভ করা' : '☆ সেভ'}</button>
-            </div>
-          </article>`;
-      }).join('');
-      renderIcons();
-    }
-
-    function toggleBookmark(chapterId) {
-      if (!progress[chapterId]) progress[chapterId] = { status: 'not_started', notes: '', bookmarked: false };
-      progress[chapterId].bookmarked = !progress[chapterId].bookmarked;
-      saveProgress();
-      renderChapters();
-      showToast(progress[chapterId].bookmarked ? '★ অধ্যায় বুকমার্ক করা হয়েছে' : 'বুকমার্ক সরানো হয়েছে');
-    }
-
-    // Modal Handling
-    function openChapterModal(chapterId, subjectName) {
-      let foundChap = null;
-      for (const s of SUBJECTS) {
-        const c = s.chapters.find(x => x.id === chapterId);
-        if (c) { foundChap = c; break; }
-      }
-      if (!foundChap) return;
-
-      activeModalChapter = foundChap;
-      const p = progress[foundChap.id] || { status: 'not_started', notes: '' };
-
-      document.getElementById('modal-subject-tag').innerText = subjectName;
-      document.getElementById('modal-title').innerText = foundChap.name;
-      document.getElementById('modal-summary').innerText = foundChap.summary || '';
-      document.getElementById('modal-notes').value = p.notes || '';
-
-      updateModalStatusUI(['not_started','reading','mastered'].includes(p.status) ? p.status : 'not_started');
-      document.getElementById('chapter-modal').classList.remove('hidden');
-      renderIcons();
-    }
-
-    function closeChapterModal() {
-      document.getElementById('chapter-modal').classList.add('hidden');
-      activeModalChapter = null;
-      renderChapters();
-    }
-
-    function setModalChapterStatus(status) {
-      if (!activeModalChapter || !['not_started', 'reading', 'mastered'].includes(status)) return;
-      if (!progress[activeModalChapter.id]) progress[activeModalChapter.id] = { notes: '', bookmarked: false };
-      progress[activeModalChapter.id].status = status;
-      delete progress[activeModalChapter.id].reviewDue;
-      saveProgress();
-      updateModalStatusUI(status);
-      renderSubjectFilters();
-      renderChapters();
-      updateStats();
-    }
-
-    function saveModalNotes(notes) {
-      if (!activeModalChapter) return;
-      if (!progress[activeModalChapter.id]) progress[activeModalChapter.id] = {};
-      progress[activeModalChapter.id].notes = notes;
-      saveProgress();
-    }
-
-    function updateModalStatusUI(status) {
-      document.querySelectorAll('#modal-status-buttons button').forEach(btn => {
-        if (btn.dataset.mstatus === status) {
-          btn.classList.add('bg-indigo-600', 'text-white', 'font-bold');
-        } else {
-          btn.classList.remove('bg-indigo-600', 'text-white', 'font-bold');
-        }
-      });
-    }
-
-    // Stats calculation: counts and overall progress use the three-state model.
-    function updateStats() {
-      let mastered = 0, reading = 0, incomplete = 0;
-      SUBJECTS.forEach(s => s.chapters.forEach(c => {
-        const status = progress[c.id]?.status;
-        if (status === 'mastered') mastered++;
-        else if (status === 'reading') reading++;
-        else incomplete++;
-      }));
-      const pct = TOTAL_CHAPTERS ? Math.round((mastered / TOTAL_CHAPTERS) * 100) : 0;
-      const setText = (id, value) => { const el = document.getElementById(id); if (el) el.innerText = value; };
-      setText('mastered-count-badge', `${mastered}/${TOTAL_CHAPTERS}`);
-      setText('stat-total', `${TOTAL_CHAPTERS.toLocaleString('bn-BD')} টি`);
-      setText('stat-mastered', mastered.toLocaleString('bn-BD'));
-      setText('stat-reading', reading.toLocaleString('bn-BD'));
-      setText('stat-incomplete', incomplete.toLocaleString('bn-BD'));
-      setText('stat-percent', `${pct.toLocaleString('bn-BD')}% সম্পন্ন`);
-      setText('hero-progress', `${pct.toLocaleString('bn-BD')}%`);
-      setText('hero-mastered', `${mastered.toLocaleString('bn-BD')} / ${TOTAL_CHAPTERS.toLocaleString('bn-BD')}`);
-      const ring = document.getElementById('progress-ring');
-      if (ring) ring.style.setProperty('--progress', `${pct * 3.6}deg`);
-    }
-
-    function resetAllProgress() {
-      document.getElementById('reset-modal').classList.add('show');
-      document.getElementById('reset-modal').setAttribute('aria-hidden', 'false');
-    }
-    function closeResetModal() {
-      document.getElementById('reset-modal').classList.remove('show');
-      document.getElementById('reset-modal').setAttribute('aria-hidden', 'true');
-    }
-    function confirmResetProgress() {
-      progress = {};
-      saveProgress();
-      renderChapters();
-      renderSubjectFilters();
-      updateStats();
-      closeResetModal();
-      showToast('অধ্যায়ের প্রগ্রেস রিসেট করা হয়েছে');
-    }
-
-    // Daily checklist: goals are automatically saved after every change.
-    function renderGoals() {
-      const list = document.getElementById('goals-list');
-      if (!list) return;
-      if (!goals.length) {
-        list.innerHTML = '<div class="text-center py-7 px-4 rounded-xl border border-dashed border-slate-700 text-slate-500"><div class="text-2xl mb-2">✦</div><p class="text-sm font-bold">আজকের কোনো লক্ষ্য যোগ করা হয়নি</p><p class="text-xs mt-1">উপরে লিখে প্রথম লক্ষ্যটি যোগ করো।</p></div>';
-        return;
-      }
-      list.innerHTML = goals.map(goal => `
-        <div class="goal-row ${goal.done ? 'is-done' : ''}" data-goal-id="${escapeHTML(goal.id)}">
-          <input type="checkbox" ${goal.done ? 'checked' : ''} aria-label="লক্ষ্য সম্পন্ন" onchange="toggleGoal('${escapeHTML(goal.id)}', this.checked)" class="w-5 h-5 accent-violet-500 shrink-0">
-          <span class="goal-text text-sm text-slate-200">${escapeHTML(goal.text)}</span>
-          <button type="button" onclick="deleteGoal('${escapeHTML(goal.id)}')" class="px-2.5 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10" aria-label="লক্ষ্য মুছুন" title="লক্ষ্য মুছুন">×</button>
-        </div>`).join('');
-    }
-
-    function addGoal() {
-      const input = document.getElementById('goal-input');
-      const text = String(input?.value || '').trim();
-      if (!text) { showToast('আগে একটি লক্ষ্য লিখুন'); input?.focus(); return; }
-      if (text.length > 180) { showToast('লক্ষ্যটি ১৮০ অক্ষরের মধ্যে রাখুন'); return; }
-      goals.push({ id: `goal-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, text, done: false, createdAt: localDateKey() });
-      try { localStorage.setItem('ssc_goals_standalone', JSON.stringify(goals)); }
-      catch (error) { goals.pop(); showToast('ডিভাইসে জায়গা নেই—লক্ষ্য সেভ হয়নি।'); return; }
-      input.value = '';
-      renderGoals();
-      showToast('লক্ষ্য যোগ করা হয়েছে');
-    }
-
-    function toggleGoal(id, checked) {
-      const goal = goals.find(item => item.id === id);
-      if (!goal) return;
-      goal.done = !!checked;
-      try { localStorage.setItem('ssc_goals_standalone', JSON.stringify(goals)); }
-      catch (error) { showToast('লক্ষ্য সেভ করা যায়নি'); }
-      renderGoals();
-    }
-
-    function deleteGoal(id) {
-      goals = goals.filter(item => item.id !== id);
-      try { localStorage.setItem('ssc_goals_standalone', JSON.stringify(goals)); }
-      catch (error) { showToast('পরিবর্তন সেভ করা যায়নি'); }
-      renderGoals();
-      showToast('লক্ষ্য মুছে ফেলা হয়েছে');
-    }
-
-    // Planner settings use a single validated localStorage object.
-    function loadPlannerSettings() {
-      const settings = readStoredJSON('ssc_planner_settings', {});
-      const date = document.getElementById('exam-date');
-      const goal = document.getElementById('daily-focus-goal');
-      if (date) date.value = settings.examDate && /^\d{4}-\d{2}-\d{2}$/.test(settings.examDate) ? settings.examDate : '';
-      if (goal) goal.value = String(Math.min(1440, Math.max(15, Number(settings.dailyGoal) || 120)));
-    }
-
-    function savePlannerSettings() {
-      const date = document.getElementById('exam-date');
-      const goal = document.getElementById('daily-focus-goal');
-      const dateValue = date?.value || '';
-      if (dateValue && !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) { showToast('সঠিক পরীক্ষার তারিখ দিন'); return; }
-      const rawGoal = Number(goal?.value);
-      const dailyGoal = Number.isFinite(rawGoal) ? Math.min(1440, Math.max(15, rawGoal)) : 120;
-      if (goal) goal.value = String(dailyGoal);
-      const settings = { examDate: dateValue, dailyGoal };
-      try { localStorage.setItem('ssc_planner_settings', JSON.stringify(settings)); }
-      catch (error) { showToast('সেটিংস সেভ করা যায়নি'); return; }
-      renderPlanner();
-      showToast('পরিকল্পনা সেভ হয়েছে');
-    }
-
-    // In-app confirmation modal; never uses browser confirm().
-    function showAppConfirmation(title, message, actionLabel, onConfirm) {
-      const modal = document.getElementById('confirm-modal');
-      if (!modal) { showToast('নিশ্চিতকরণ উইন্ডো পাওয়া যায়নি'); return; }
-      pendingAppConfirmation = typeof onConfirm === 'function' ? onConfirm : null;
-      const titleEl = document.getElementById('confirm-title');
-      const messageEl = document.getElementById('confirm-message');
-      const yes = document.getElementById('confirm-yes');
-      if (titleEl) titleEl.textContent = title || 'নিশ্চিত করবেন?';
-      if (messageEl) messageEl.textContent = message || '';
-      if (yes) yes.textContent = actionLabel || 'নিশ্চিত করুন';
-      modal.classList.add('show');
-      modal.setAttribute('aria-hidden', 'false');
-      yes?.focus();
-    }
-
-    function closeAppConfirmation() {
-      const modal = document.getElementById('confirm-modal');
-      if (modal) { modal.classList.remove('show'); modal.setAttribute('aria-hidden', 'true'); }
-      pendingAppConfirmation = null;
-    }
-
-    function acceptAppConfirmation() {
-      const action = pendingAppConfirmation;
-      closeAppConfirmation();
-      if (typeof action === 'function') {
-        try { action(); } catch (error) { console.error(error); showToast('কাজটি সম্পন্ন করা যায়নি'); }
-      }
-    }
-
-    function renderPlanner() {
-      const settings = readStoredJSON('ssc_planner_settings', {});
-      const examEl = document.getElementById('exam-countdown');
-      if (examEl) {
-        if (!settings.examDate || !/^\d{4}-\d{2}-\d{2}$/.test(settings.examDate)) examEl.textContent = 'পরীক্ষার তারিখ সেট করো';
-        else {
-          const target = new Date(`${settings.examDate}T00:00:00`);
-          const today = new Date(); today.setHours(0,0,0,0);
-          const days = Math.ceil((target.getTime() - today.getTime()) / 86400000);
-          examEl.textContent = days < 0 ? `পরীক্ষার তারিখ পেরিয়েছে ${Math.abs(days)} দিন` : days === 0 ? 'আজই পরীক্ষার দিন!' : `পরীক্ষার আর ${days} দিন বাকি`;
-        }
-      }
-      const todayKey = localDateKey();
-      const todaySessions = Number(pomoHistory[todayKey]) || 0;
-      const todayMinutes = todaySessions * 25;
-      const goal = Math.max(15, Number(settings.dailyGoal) || 120);
-      const focus = document.getElementById('today-focus-progress');
-      if (focus) focus.textContent = `আজকের ফোকাস: ${todayMinutes.toLocaleString('bn-BD')} / ${goal.toLocaleString('bn-BD')} মিনিট (${Math.min(100, Math.round(todayMinutes / goal * 100))}%)`;
-
-      const analytics = document.getElementById('weekly-analytics');
-      const summary = document.getElementById('analytics-summary');
-      const rows = [];
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate() - i);
-        const key = localDateKey(d);
-        rows.push({ key, label: d.toLocaleDateString('bn-BD', { weekday: 'short', day: 'numeric' }), sessions: Math.max(0, Number(pomoHistory[key]) || 0) });
-      }
-      if (analytics) analytics.innerHTML = rows.map(r => `<div class="grid grid-cols-[58px_1fr_34px] gap-2 items-center text-xs"><span class="text-slate-400">${r.label}</span><div class="h-2.5 rounded-full bg-slate-800 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-sky-400" style="width:${Math.min(100, r.sessions / Math.max(1, ...rows.map(x => x.sessions)) * 100)}%"></div></div><span class="text-right text-slate-300">${r.sessions.toLocaleString('bn-BD')}</span></div>`).join('');
-      const totalSessions = rows.reduce((n, r) => n + r.sessions, 0);
-      if (summary) summary.textContent = `৭ দিনে ${totalSessions.toLocaleString('bn-BD')}টি ফোকাস সেশন · আনুমানিক ${(totalSessions * 25).toLocaleString('bn-BD')} মিনিট পড়াশোনা`;
-    }
-    function exportBackup() {
-      const backup = {
-        app: 'SSC StudyHub', version: 1, exportedAt: new Date().toISOString(),
-        progress: readStoredJSON('ssc_progress_standalone_v2', {}),
-        goals: readStoredJSON('ssc_goals_standalone', []),
-        pomoCount: Math.max(0, Number(localStorage.getItem('ssc_pomo_count')) || 0),
-        pomoHistory: readStoredJSON('ssc_pomo_history', {}),
-        pomoState: readStoredJSON('ssc_pomo_state', null),
-        theme: localStorage.getItem('ssc_theme') || 'dark',
-        plannerSettings: readStoredJSON('ssc_planner_settings', {})
-      };
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = `SSC-StudyHub-Backup-${localDateKey()}.json`;
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-      showToast('ব্যাকআপ ফাইল তৈরি হয়েছে');
-    }
-    async function importBackupFile(input) {
-      const file = input.files && input.files[0];
-      if (!file) return;
-      try {
-        if (file.size > 5 * 1024 * 1024) throw new Error('ফাইলটি ৫ MB-এর চেয়ে বড়।');
-        const data = JSON.parse(await file.text());
-        if (!data || data.app !== 'SSC StudyHub' || data.version !== 1 || !data.progress || typeof data.progress !== 'object' || Array.isArray(data.progress) || !Array.isArray(data.goals)) throw new Error('এটি বৈধ SSC StudyHub ব্যাকআপ ফাইল নয়।');
-        const doImport = () => {
-        const pairs = [
-          ['ssc_progress_standalone_v2', data.progress], ['ssc_goals_standalone', data.goals],
-          ['ssc_pomo_count', String(Math.max(0, Number(data.pomoCount) || 0))],
-          ['ssc_pomo_history', data.pomoHistory && typeof data.pomoHistory === 'object' && !Array.isArray(data.pomoHistory) ? data.pomoHistory : {}],
-          ['ssc_pomo_state', data.pomoState && typeof data.pomoState === 'object' ? data.pomoState : null],
-          ['ssc_planner_settings', data.plannerSettings && typeof data.plannerSettings === 'object' ? data.plannerSettings : {}]
-        ];
-        for (const [key, value] of pairs) {
-          if (value === null) localStorage.removeItem(key);
-          else localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
-        }
-        if (data.theme === 'light' || data.theme === 'dark') applyTheme(data.theme);
-        location.reload();
-        };
-        showAppConfirmation('ব্যাকআপ রিস্টোর করবেন?', 'বর্তমান প্রগ্রেস, লক্ষ্য ও টাইমারের সংরক্ষিত ডেটা ব্যাকআপ ফাইলের ডেটা দিয়ে প্রতিস্থাপন হবে।', 'রিস্টোর করুন', doImport);
-      } catch (e) { showToast(e.message || 'ব্যাকআপ রিস্টোর করা যায়নি'); }
-      finally { input.value = ''; }
-    }
-
-    // Pomodoro timer: deadline-based timing avoids drift when a tab sleeps.
-    let pomoTime = 25 * 60;
-    let pomoTimer = null;
-    let pomoCount = Math.max(0, parseInt(localStorage.getItem('ssc_pomo_count') || '0', 10) || 0);
-    document.getElementById('pomo-session-count').innerText = pomoCount.toLocaleString('bn-BD');
-
-    function persistPomodoro() {
-      try {
-        localStorage.setItem('ssc_pomo_state', JSON.stringify({
-          mode: pomoMode, remaining: pomoTime, running: pomoRunning,
-          endsAt: pomoEndsAt, savedAt: Date.now()
-        }));
-      } catch (error) { /* Timer remains usable even if storage is unavailable. */ }
-    }
-
-    function paintPomodoroMode() {
-      const study = document.getElementById('pomo-study-btn');
-      const brk = document.getElementById('pomo-break-btn');
-      study.className = 'px-4 py-1.5 rounded-xl text-xs font-bold transition-all ' +
-        (pomoMode === 'study' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400');
-      brk.className = 'px-4 py-1.5 rounded-xl text-xs font-bold transition-all ' +
-        (pomoMode === 'break' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400');
-    }
-
-    function setPomodoroMode(mode) {
-      stopPomodoroTick();
-      pomoMode = mode === 'break' ? 'break' : 'study';
-      pomoRunning = false;
-      pomoEndsAt = null;
-      pomoTime = pomoMode === 'study' ? 25 * 60 : 5 * 60;
-      document.getElementById('pomo-start-btn').innerText = 'শুরু করুন';
-      paintPomodoroMode();
-      updatePomoDisplay();
-      persistPomodoro();
-    }
-
-    function stopPomodoroTick() {
-      if (pomoTimer) clearInterval(pomoTimer);
-      pomoTimer = null;
-    }
-
-    function startPomodoroTick() {
-      stopPomodoroTick();
-      pomoTimer = setInterval(() => {
-        if (!pomoRunning || !Number.isFinite(pomoEndsAt)) return;
-        pomoTime = Math.max(0, Math.ceil((pomoEndsAt - Date.now()) / 1000));
-        updatePomoDisplay();
-        if (pomoTime <= 0) finishPomodoro();
-      }, 250);
-    }
-
-    function togglePomodoro() {
-      if (pomoRunning) {
-        pomoTime = Math.max(0, Math.ceil((pomoEndsAt - Date.now()) / 1000));
-        pomoRunning = false;
-        pomoEndsAt = null;
-        stopPomodoroTick();
-        document.getElementById('pomo-start-btn').innerText = 'চালু করুন';
-        document.getElementById('study-floating').classList.remove('running');
-        persistPomodoro();
-        updatePomoDisplay();
-        showToast('টাইমার বিরতি দেওয়া হয়েছে');
-      } else {
-        if (pomoTime <= 0) pomoTime = pomoMode === 'study' ? 25 * 60 : 5 * 60;
-        pomoRunning = true;
-        pomoEndsAt = Date.now() + pomoTime * 1000;
-        document.getElementById('pomo-start-btn').innerText = 'থামান';
-        document.getElementById('study-floating').classList.add('show','running');
-        persistPomodoro();
-        startPomodoroTick();
-        updatePomoDisplay();
-      }
-    }
-
-    function finishPomodoro() {
-      stopPomodoroTick();
-      pomoRunning = false;
-      pomoEndsAt = null;
-      pomoTime = 0;
-      if (pomoMode === 'study') {
-        pomoCount++;
-        try { localStorage.setItem('ssc_pomo_count', String(pomoCount)); } catch (e) {}
-        const sessionCountEl = document.getElementById('pomo-session-count');
-        if (sessionCountEl) sessionCountEl.innerText = pomoCount.toLocaleString('bn-BD');
-        const dayKey = localDateKey();
-        pomoHistory[dayKey] = (Number(pomoHistory[dayKey]) || 0) + 1;
-        try { localStorage.setItem('ssc_pomo_history', JSON.stringify(pomoHistory)); } catch (e) {}
-      }
-      updatePomoDisplay();
-      document.getElementById('pomo-start-btn').innerText = 'শুরু করুন';
-      document.getElementById('study-floating').classList.remove('running');
-      persistPomodoro();
-      playFinishSignal();
-      showToast(pomoMode === 'study' ? '🎉 ফোকাস সেশন শেষ! এবার একটু বিরতি নাও।' : '☀️ বিরতি শেষ—আবার শুরু করার সময়!');
-      if ('Notification' in window && Notification.permission === 'granted') {
-        try { new Notification('SSC StudyHub', { body: pomoMode === 'study' ? 'ফোকাস সেশন শেষ! একটু বিরতি নাও।' : 'বিরতি শেষ! পড়ায় ফিরে যাও।' }); } catch (e) {}
-      }
-      if (pomoMode === 'study') {
-        pomoMode = 'break'; pomoTime = 5 * 60;
-      } else {
-        pomoMode = 'study'; pomoTime = 25 * 60;
-      }
-      paintPomodoroMode();
-      updatePomoDisplay();
-      persistPomodoro();
-      renderPlanner();
-    }
-
-    function playFinishSignal() {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        [0, 0.22, 0.44].forEach((delay, i) => {
-          const osc = ctx.createOscillator(), gain = ctx.createGain();
-          osc.type = 'sine'; osc.frequency.value = [660, 784, 988][i];
-          gain.gain.setValueAtTime(0.0001, ctx.currentTime + delay);
-          gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + delay + 0.03);
-          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 0.32);
-          osc.connect(gain); gain.connect(ctx.destination);
-          osc.start(ctx.currentTime + delay); osc.stop(ctx.currentTime + delay + 0.34);
-        });
-        setTimeout(() => ctx.close(), 1200);
-      } catch (e) {}
-    }
-
-    function restorePomodoro() {
-      const saved = readStoredJSON('ssc_pomo_state', null);
-      if (!saved || typeof saved !== 'object') { updatePomoDisplay(); return; }
-      pomoMode = saved.mode === 'break' ? 'break' : 'study';
-      pomoTime = Math.max(0, Math.min(24 * 60 * 60, Number(saved.remaining) || 0));
-      // Never auto-resume after a reload: a running timer is restored as paused.
-      pomoRunning = false;
-      pomoEndsAt = null;
-      let sessionExpired = false;
-      if (saved.running && Number.isFinite(Number(saved.endsAt))) {
-        pomoTime = Math.max(0, Math.ceil((Number(saved.endsAt) - Date.now()) / 1000));
-        sessionExpired = pomoTime <= 0;
-      }
-      document.getElementById('pomo-start-btn').innerText = 'চালু করুন';
-      paintPomodoroMode();
-      if (sessionExpired) {
-        // The deadline proves the previous run ended; finish once and persist the next phase.
-        finishPomodoro();
-        return;
-      }
-      updatePomoDisplay();
-      persistPomodoro();
-    }
-
-    function resetPomodoro() {
-      stopPomodoroTick();
-      pomoRunning = false;
-      pomoEndsAt = null;
-      pomoTime = pomoMode === 'study' ? 25 * 60 : 5 * 60;
-      document.getElementById('pomo-start-btn').innerText = 'শুরু করুন';
-      document.getElementById('study-floating').classList.remove('running');
-      updatePomoDisplay();
-      persistPomodoro();
-      showToast('টাইমার রিসেট হয়েছে');
-    }
-
-    function updatePomoDisplay() {
-      const safeTime = Math.max(0, Number(pomoTime) || 0);
-      const m = Math.floor(safeTime / 60).toString().padStart(2, '0');
-      const s = (safeTime % 60).toString().padStart(2, '0');
-      const display = `${m}:${s}`;
-      const el = document.getElementById('pomo-display');
-      if (el) el.innerText = display;
-      const float = document.getElementById('study-floating');
-      if (float) {
-        float.innerHTML = `<span>🍅</span><span>${pomoMode === 'study' ? 'ফোকাস' : 'বিরতি'} · ${display}</span>`;
-        if (pomoRunning) float.classList.add('show','running');
-        else if (pomoTime !== (pomoMode === 'study' ? 25 * 60 : 5 * 60)) float.classList.add('show');
-        else float.classList.remove('show');
-      }
-      document.title = pomoRunning ? `${display} · SSC StudyHub` : 'SSC StudyHub';
-    }
-
-    function openFloatingTimer() {
-      switchTab('pomodoro');
-      document.getElementById('view-pomodoro').scrollIntoView({behavior:'smooth',block:'start'});
-    }
-
-    // Run on load
-    window.addEventListener('beforeunload', () => {
-      if (pomoRunning && Number.isFinite(pomoEndsAt)) {
-        pomoTime = Math.max(0, Math.ceil((pomoEndsAt - Date.now()) / 1000));
-      }
-      persistPomodoro();
+    {
+    "id": "biology",
+    "name": "জীববিজ্ঞান",
+    "icon": "🌿",
+    "chapters": [
+      {"id": "biology-1", "name": "জীবন পাঠ"},
+      {"id": "biology-2", "name": "জীবকোষ ও টিস্যু"},
+      {"id": "biology-3", "name": "কোষ বিভাজন"},
+      {"id": "biology-4", "name": "জীবনীশক্তি"},
+      {"id": "biology-5", "name": "খাদ্য, পুষ্টি এবং পরিপাক"},
+      {"id": "biology-6", "name": "জীবে পরিবহন"},
+      {"id": "biology-7", "name": "গ্যাসীয় বিনিময়"},
+      {"id": "biology-8", "name": "রেচন প্রক্রিয়া"},
+      {"id": "biology-9", "name": "দৃঢ়তা প্রদান ও চলন"},
+      {"id": "biology-10", "name": "সমন্বয়"},
+      {"id": "biology-11", "name": "জীবের প্রজনন"},
+      {"id": "biology-12", "name": "জীবের বংশগতি ও বিবর্তন"},
+      {"id": "biology-13", "name": "জীবের পরিবেশ"},
+      {"id": "biology-14", "name": "জীবপ্রযুক্তি"}
+    ]
+  },
+  {
+    "id": "bgs",
+    "name": "বাংলাদেশ ও বিশ্বপরিচয়",
+    "icon": "🌏",
+    "chapters": [
+      {"id": "bgs-1", "name": "পূর্ব বাংলার আন্দোলন ও জাতীয়তাবাদের উত্থান (১৯৪৭-১৯৭০)"},
+      {"id": "bgs-2", "name": "স্বাধীন বাংলাদেশ"},
+      {"id": "bgs-3", "name": "সৌরজগৎ ও ভূমণ্ডল"},
+      {"id": "bgs-4", "name": "বাংলাদেশের ভূপ্রকৃতি ও জলবায়ু"},
+      {"id": "bgs-5", "name": "বাংলাদেশের নদ-নদী ও প্রাকৃতিক সম্পদ"},
+      {"id": "bgs-6", "name": "রাষ্ট্র, নাগরিকতা ও আইন"},
+      {"id": "bgs-7", "name": "বাংলাদেশ সরকারের অঙ্গসমূহ ও প্রশাসন ব্যবস্থা"},
+      {"id": "bgs-8", "name": "বাংলাদেশের গণতন্ত্র ও নির্বাচন"},
+      {"id": "bgs-9", "name": "জাতিসংঘ ও বাংলাদেশ"},
+      {"id": "bgs-10", "name": "টেকসই উন্নয়ন অভীষ্ট (SDG)"},
+      {"id": "bgs-11", "name": "জাতীয় সম্পদ ও অর্থনৈতিক ব্যবস্থা"},
+      {"id": "bgs-12", "name": "অর্থনৈতিক নির্দেশকসমূহ ও বাংলাদেশের অর্থনীতির প্রকৃতি"},
+      {"id": "bgs-13", "name": "বাংলাদেশ সরকারের অর্থ ও ব্যাংক ব্যবস্থা"},
+      {"id": "bgs-14", "name": "বাংলাদেশের সামাজিক পরিবর্তন"},
+      {"id": "bgs-15", "name": "বাংলাদেশের সামাজিক সমস্যা ও এর প্রতিকার"},
+      {"id": "bgs-16", "name": "বাংলাদেশের সাংস্কৃতিক বৈচিত্র্য"}
+    ]
+  },
+  {
+    "id": "ict",
+    "name": "তথ্য ও যোগাযোগ প্রযুক্তি",
+    "icon": "💻",
+    "chapters": [
+      {"id": "ict-1", "name": "তথ্য ও যোগাযোগ প্রযুক্তি এবং আমাদের বাংলাদেশ"},
+      {"id": "ict-2", "name": "কম্পিউটার ও কম্পিউটার ব্যবহারকারীর নিরাপত্তা"},
+      {"id": "ict-3", "name": "আমার শিক্ষায় ইন্টারনেট"},
+      {"id": "ict-4", "name": "আমার লেখালেখি ও হিসাব"},
+      {"id": "ict-5", "name": "মাল্টিমিডিয়া ও গ্রাফিক্স"},
+      {"id": "ict-6", "name": "ডাটাবেজ এর ব্যবহার"}
+    ]
+  },
+  {
+    "id": "islamic_studies",
+    "name": "ইসলাম ও নৈতিক শিক্ষা",
+    "icon": "📖",
+    "chapters": [
+      {"id": "islamic_studies-1", "name": "আকাইদ ও নৈতিক জীবন"},
+      {"id": "islamic_studies-2", "name": "শরীয়তের উৎস"},
+      {"id": "islamic_studies-3", "name": "ইবাদত"},
+      {"id": "islamic_studies-4", "name": "আখলাক"},
+      {"id": "islamic_studies-5", "name": "আদর্শ জীবনচরিত"}
+    ]
+  }
+];
+const KEY = {progress:'ssc_progress_standalone_v2', goals:'ssc_goals_standalone', pomo:'ssc_pomo_count', hist:'ssc_pomo_history', seconds:'ssc_study_seconds', state:'ssc_pomo_state', theme:'ssc_theme', planner:'ssc_planner_settings'};
+const read = (k, fb) => { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : fb; } catch { return fb; } };
+const write = (k, v) => { try { localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); } catch { toast('সেভ হয়নি'); } };
+let progress = read(KEY.progress, {});
+if (!progress || typeof progress !== 'object' || Array.isArray(progress)) progress = {};
+Object.values(progress).forEach(p => { if (!p || typeof p !== 'object') return; if (p.status !== 'mastered' && p.status !== 'reading') p.status = 'not_started'; });
+let goals = read(KEY.goals, []); if (!Array.isArray(goals)) goals = [];
+let pomoHistory = read(KEY.hist, {}); if (!pomoHistory || Array.isArray(pomoHistory)) pomoHistory = {};
+let seconds = read(KEY.seconds, {}); if (!seconds || Array.isArray(seconds)) seconds = {};
+let planner = read(KEY.planner, {}); if (!planner || typeof planner !== 'object') planner = {};
+let filterSub = 'all', filterStatus = 'all', collapsed = {};
+let noteId = null, confirmFn = null;
+let swReg = null;
+const pomo = { running:false, mode:'focus', remaining:25*60, end:0, session:1, timer:null, book:'', chapter:'' };
+let audioCtx = null;
+function today(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2400); }
+function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function allChapters(){ return SUBJECTS.flatMap(s => s.chapters.map(c => ({...c, subject:s}))); }
+function prog(id){ return progress[id] || { status:'not_started', notes:'', bookmarked:false }; }
+function saveProgress(){ write(KEY.progress, progress); paintDash(); }
+function cycle(id){
+  const order=['not_started','reading','mastered'];
+  const cur=prog(id).status;
+  const next=order[(order.indexOf(cur)+1)%order.length];
+  progress[id]={...prog(id), status:next};
+  saveProgress(); renderSyllabus();
+}
+function toggleBm(id){ progress[id]={...prog(id), bookmarked:!prog(id).bookmarked}; saveProgress(); renderSyllabus(); toast(progress[id].bookmarked?'বুকমার্ক':'বুকমার্ক সরানো'); }
+function openNote(id){ noteId=id; const c=allChapters().find(x=>x.id===id); document.getElementById('noteTitle').textContent=c?c.name:'Note'; document.getElementById('noteSub').textContent=c?c.subject.name:''; document.getElementById('noteBox').value=prog(id).notes||''; document.getElementById('noteModal').classList.add('show'); }
+function closeNote(){ document.getElementById('noteModal').classList.remove('show'); noteId=null; }
+function saveNote(){ if(!noteId) return; progress[noteId]={...prog(noteId), notes:document.getElementById('noteBox').value}; saveProgress(); closeNote(); toast('নোট সেভ'); }
+function setFilter(v){ filterStatus=v; renderSyllabus(); }
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+id));
+  if(id==='history') drawHist();
+  if(id==='goals') renderGoals();
+}
+function statusLabel(s){ return s==='mastered'?'সম্পন্ন':s==='reading'?'চলমান':'অসম্পূর্ণ'; }
+function renderSyllabus(){
+  const q=(document.getElementById('search').value||'').trim().toLowerCase();
+  const host=document.getElementById('subjects');
+  const filters=document.getElementById('subFilters');
+  const chips=[{id:'all',name:'সব'}].concat(SUBJECTS.map(s=>({id:s.id,name:s.icon+' '+s.name})));
+  filters.innerHTML=chips.map(c=>`<button class="filter ${filterSub===c.id?'active':''}" onclick="filterSub='${c.id}';renderSyllabus()">${esc(c.name)}</button>`).join('');
+  host.innerHTML=SUBJECTS.filter(s=>filterSub==='all'||s.id===filterSub).map(s=>{
+    const rows=s.chapters.map((c,i)=>{
+      const p=prog(c.id);
+      const hit=!q || c.name.toLowerCase().includes(q) || s.name.toLowerCase().includes(q);
+      const ok = hit && (filterStatus==='all' || (filterStatus==='bookmarked'?p.bookmarked:p.status===filterStatus));
+      if(!ok) return '';
+      return `<div class="chapter ${p.status}"><div class="num">${i+1}</div><div class="chapter-main"><div class="chapter-name">${esc(c.name)}</div><div class="chapter-status">${statusLabel(p.status)}${p.bookmarked?' · ★':''}</div></div><div class="tools"><button class="mini" onclick="cycle('${c.id}')">${statusLabel(p.status)}</button><button class="mini" onclick="toggleBm('${c.id}')">${p.bookmarked?'★':'☆'}</button><button class="mini" onclick="openNote('${c.id}')">Note</button><button class="mini" onclick="studyChapter('${s.id}','${c.id}')">Study</button></div></div>`;
+    }).join('');
+    if(!rows) return '';
+    const done=s.chapters.filter(c=>prog(c.id).status==='mastered').length;
+    const pct=Math.round(done/s.chapters.length*100);
+    const col=collapsed[s.id]?' collapsed':'';
+    return `<article class="card subject${col}"><div class="subject-head" onclick="collapsed['${s.id}']=!collapsed['${s.id}'];renderSyllabus()"><div class="subject-icon">${s.icon}</div><div class="subject-info"><div class="subject-title">${esc(s.name)} <span class="badge-pct">${pct}%</span></div><div class="subject-meta">${done} complete · ${s.chapters.length} total</div></div><div class="subject-progress"><div class="smallbar"><i style="width:${pct}%"></i></div></div><div class="chev">▼</div></div><div class="subject-body"><div class="chapters">${rows}</div></div></article>`;
+  }).join('') || '<div class="card section">কোনো অধ্যায় মিলল না।</div>';
+}
+function paintDash(){
+  const all=allChapters();
+  const done=all.filter(c=>prog(c.id).status==='mastered').length;
+  const read=all.filter(c=>prog(c.id).status==='reading').length;
+  document.getElementById('stTotal').textContent=all.length;
+  document.getElementById('stDone').textContent=done;
+  document.getElementById('stRead').textContent=read;
+  document.getElementById('stPct').textContent=(all.length? (done/all.length*100).toFixed(1):'0')+'%';
+  const sec=Number(seconds[today()])||0;
+  const mins=Math.round(sec/60);
+  const goal=Math.max(15, Number(planner.dailyGoal)||120);
+  document.getElementById('qToday').textContent=mins+'m';
+  document.getElementById('qGoal').textContent=Math.min(100, Math.round(mins/goal*100))+'%';
+  let streak=0; for(let i=0;i<400;i++){ const d=new Date(); d.setDate(d.getDate()-i); const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); if((Number(seconds[k])||0)>0 || (Number(pomoHistory[k])||0)>0) streak++; else if(i>0) break; }
+  document.getElementById('qStreak').textContent=streak+' days';
+  const ex=document.getElementById('examDate'); if(ex && planner.examDate) ex.value=planner.examDate;
+  const dg=document.getElementById('dailyGoal'); if(dg) dg.value=goal;
+  let examTxt='তারিখ সেট করো';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(planner.examDate||'')){
+    const target=new Date(planner.examDate+'T00:00:00'); const t0=new Date(); t0.setHours(0,0,0,0);
+    const days=Math.ceil((target-t0)/86400000);
+    examTxt=days<0?Math.abs(days)+' দিন আগে':days===0?'আজ':days+' দিন';
+  }
+  document.getElementById('qExam').textContent=examTxt;
+  document.getElementById('examLeft').textContent=examTxt;
+  const reading=all.find(c=>prog(c.id).status==='reading') || all.find(c=>prog(c.id).status!=='mastered');
+  if(reading){ document.getElementById('contTitle').textContent=reading.name; document.getElementById('contSub').textContent=reading.subject.name; document.getElementById('contStudy').onclick=()=>studyChapter(reading.subject.id, reading.id); }
+}
+function renderGoals(){
+  const box=document.getElementById('goals');
+  box.innerHTML=goals.map((g,i)=>`<div class="goal ${g.done?'done':''}"><button class="mini" onclick="goals[${i}].done=!goals[${i}].done;write(KEY.goals,goals);renderGoals()">${g.done?'✓':'○'}</button><span style="flex:1">${esc(g.text)}</span><button class="mini" onclick="goals.splice(${i},1);write(KEY.goals,goals);renderGoals()">মুছুন</button></div>`).join('') || '<p class="sub" style="margin-top:10px">এখনো কোনো লক্ষ্য নেই।</p>';
+}
+function addGoal(){ const v=document.getElementById('goalInput').value.trim(); if(!v) return; goals.push({text:v,done:false}); write(KEY.goals,goals); document.getElementById('goalInput').value=''; renderGoals(); }
+function savePlanner(){ planner.examDate=document.getElementById('examDate').value; planner.dailyGoal=Number(document.getElementById('dailyGoal').value)||120; write(KEY.planner, planner); paintDash(); }
+function drawHist(){
+  const c=document.getElementById('hist'); if(!c) return;
+  const rows=[]; for(let i=6;i>=0;i--){ const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()-i); const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); const m=Math.round((Number(seconds[k])||0)/60) || (Number(pomoHistory[k])||0)*25; rows.push({label:d.toLocaleDateString('bn-BD',{weekday:'short'}), m}); }
+  const sum=rows.reduce((n,r)=>n+r.m,0);
+  document.getElementById('histSum').textContent='৭ দিনে '+sum+' মিনিট ফোকাস';
+  const r=c.getBoundingClientRect(), dpr=devicePixelRatio||1; c.width=r.width*dpr; c.height=r.height*dpr;
+  const ctx=c.getContext('2d'); ctx.scale(dpr,dpr); const w=r.width,h=r.height; ctx.clearRect(0,0,w,h);
+  const max=Math.max(30,...rows.map(x=>x.m)); const pad={l:28,r:8,t:10,b:24}; const bw=(w-pad.l-pad.r)/rows.length;
+  ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--primary')||'#2563eb';
+  rows.forEach((row,i)=>{ const bh=Math.max(2,(row.m/max)*(h-pad.t-pad.b)); const x=pad.l+i*bw+6; ctx.fillRect(x, h-pad.b-bh, bw-12, bh); ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--muted'); ctx.font='11px sans-serif'; ctx.fillText(row.label, x, h-6); ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--primary')||'#2563eb'; });
+}
+function exportBackup(){
+  const backup={app:'SSC StudyHub', version:1, exportedAt:new Date().toISOString(), progress, goals, pomoCount:Number(localStorage.getItem(KEY.pomo))||0, pomoHistory, studySeconds:seconds, pomoState:read(KEY.state,null), theme:localStorage.getItem(KEY.theme)||'dark', plannerSettings:planner};
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'})); a.download='SSC-StudyHub-Backup-'+today()+'.json'; a.click(); toast('ব্যাকআপ তৈরি');
+}
+function importBackup(input){
+  const file=input.files&&input.files[0]; if(!file) return;
+  file.text().then(text=>{
+    const data=JSON.parse(text);
+    if(!data || data.app!=='SSC StudyHub' || !data.progress) throw new Error('ভুল ফাইল');
+    ask('রিস্টোর করবে?', 'বর্তমান ডেটা প্রতিস্থাপন হবে।', ()=>{
+      progress=data.progress; goals=Array.isArray(data.goals)?data.goals:[]; pomoHistory=data.pomoHistory||{}; seconds=data.studySeconds||{}; planner=data.plannerSettings||{};
+      write(KEY.progress,progress); write(KEY.goals,goals); write(KEY.hist,pomoHistory); write(KEY.seconds,seconds); write(KEY.planner,planner);
+      if(data.theme==='light'||data.theme==='dark') applyTheme(data.theme);
+      boot(); toast('রিস্টোর হয়েছে');
     });
-    window.addEventListener('DOMContentLoaded', init);
-  </script>
-
-  <!-- App-owned confirmation dialog: no browser/GitHub identity popup -->
-  <div id="confirm-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="confirm-title">
-    <div class="confirm-box">
-      <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-2xl mb-4">?</div>
-      <h3 id="confirm-title" class="text-lg font-bold mb-2">নিশ্চিত করবেন?</h3>
-      <p id="confirm-message" class="text-sm text-slate-400 leading-relaxed"></p>
-      <div class="flex justify-end gap-2 mt-6">
-        <button type="button" onclick="closeAppConfirmation()" class="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800">বাতিল</button>
-        <button type="button" id="confirm-yes" onclick="acceptAppConfirmation()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">নিশ্চিত করুন</button>
-      </div>
-    </div>
-  </div>
-  <!-- App-owned confirmation dialog (no browser confirm popup) -->
-  <div id="reset-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="reset-title">
-    <div class="reset-box">
-      <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-2xl mb-4">↻</div>
-      <h3 id="reset-title" class="text-lg font-bold mb-2">প্রগ্রেস রিসেট করবে?</h3>
-      <p class="text-sm text-slate-400 leading-relaxed">সব অধ্যায়ের স্ট্যাটাস, বুকমার্ক এবং অধ্যায়ভিত্তিক নোট মুছে যাবে। এই কাজটি ফিরিয়ে আনা যাবে না।</p>
-      <div class="flex justify-end gap-2 mt-6">
-        <button onclick="closeResetModal()" class="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800">বাতিল</button>
-        <button onclick="confirmResetProgress()" class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold">হ্যাঁ, রিসেট</button>
-      </div>
-    </div>
-  </div>
-  <button id="study-floating" type="button" aria-label="টাইমার খুলুন">🍅 ফোকাস · 25:00</button>
-  <div id="app-toast" role="status" aria-live="polite"></div>
-
-  <footer class="mt-10 border-t border-slate-200/70 dark:border-slate-800/70 pt-5 pb-6 text-center">
-    <p class="text-sm text-slate-500 dark:text-slate-400">
-      © ২০২৬ SSC StudyHub · @turabi_alam
-    </p>
-  </footer>
+  }).catch(e=>toast(e.message||'রিস্টোর হয়নি')).finally(()=>{input.value='';});
+}
+function askReset(){ ask('প্রগ্রেস রিসেট?', 'অধ্যায় স্ট্যাটাস, বুকমার্ক ও নোট মুছে যাবে।', ()=>{ progress={}; write(KEY.progress,progress); boot(); }); }
+function ask(title,msg,fn){ document.getElementById('cTitle').textContent=title; document.getElementById('cMsg').textContent=msg; confirmFn=fn; document.getElementById('confirmModal').classList.add('show'); document.getElementById('cYes').onclick=()=>{ if(confirmFn) confirmFn(); closeConfirm(); }; }
+function closeConfirm(){ document.getElementById('confirmModal').classList.remove('show'); confirmFn=null; }
+function applyTheme(theme){ const light=theme==='light'; document.documentElement.classList.toggle('light', light); document.documentElement.classList.toggle('dark', !light); document.body.classList.toggle('light', light); document.body.classList.toggle('dark', !light); localStorage.setItem(KEY.theme, theme); document.getElementById('themeBtn').textContent=light?'🌙 Dark':'☀ Light'; const m=document.querySelector('meta[name=theme-color]'); if(m) m.content=light?'#f5f7fb':'#0f172a'; }
+function toggleTheme(){ applyTheme(document.documentElement.classList.contains('light')?'dark':'light'); drawHist(); }
+function getAudio(fromGesture){ if(!fromGesture) return audioCtx; try{ const AC=window.AudioContext||window.webkitAudioContext; if(!audioCtx&&AC) audioCtx=new AC(); if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume().catch(()=>{}); }catch(e){} return audioCtx; }
+function playChime(){ try{ const ctx=getAudio(false); if(ctx){ const now=ctx.currentTime; [523,659,784].forEach((f,i)=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.frequency.value=f; g.gain.setValueAtTime(0.0001,now+i*0.12); g.gain.exponentialRampToValueAtTime(0.2,now+i*0.12+0.02); g.gain.exponentialRampToValueAtTime(0.0001,now+i*0.12+0.4); o.connect(g); g.connect(ctx.destination); o.start(now+i*0.12); o.stop(now+i*0.12+0.42); }); } }catch(e){} try{ if(navigator.vibrate) navigator.vibrate([200,80,200]); }catch(e){} }
+async function showNotif(title, body, silent){
+  if(!('Notification' in window) || Notification.permission!=='granted') return;
+  const icon=(()=>{ try{return new URL('icon-192.png', location.href).href;}catch(e){return 'icon-192.png';} })();
+  try{ const reg=swReg || (navigator.serviceWorker? await navigator.serviceWorker.ready : null); if(reg&&reg.showNotification){ await reg.showNotification(title,{body,tag:'ssc-pomodoro',icon,badge:icon,silent:!!silent,renotify:!silent}); return; } }catch(e){}
+  try{ new Notification(title,{body,icon,tag:'ssc-pomodoro'}); }catch(e){}
+}
+function notifySW(type,payload){ try{ const msg={type,payload}; if(swReg&&swReg.active) swReg.active.postMessage(msg); else if(navigator.serviceWorker&&navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage(msg); }catch(e){} }
+function fmt(sec){ sec=Math.max(0,Math.round(sec)); return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0'); }
+function paintPomo(){
+  document.getElementById('clock').textContent=fmt(pomo.remaining);
+  document.getElementById('pomoModeLabel').textContent=pomo.mode==='focus'?'Focus':'Break';
+  document.getElementById('playBtn').textContent=pomo.running?'Pause':'Start';
+  document.getElementById('sessN').textContent=pomo.session;
+  const f=document.getElementById('float');
+  f.innerHTML='🍅 '+(pomo.mode==='focus'?'Focus':'Break')+' · '+fmt(pomo.remaining);
+  f.classList.toggle('show', pomo.running || pomo.remaining!==((pomo.mode==='focus'?Number(document.getElementById('focusMin').value):Number(document.getElementById('breakMin').value))*60));
+  document.title=pomo.running?fmt(pomo.remaining)+' · SSC StudyHub':'SSC StudyHub';
+}
+function savePomo(){ write(KEY.state,{mode:pomo.mode,remaining:pomo.remaining,running:pomo.running,end:pomo.end,session:pomo.session,book:pomo.book,chapter:pomo.chapter}); }
+function credit(sec){ if(sec<=0||pomo.mode!=='focus') return; const k=today(); seconds[k]=(Number(seconds[k])||0)+sec; write(KEY.seconds,seconds); paintDash(); }
+function tick(){
+  if(!pomo.running) return;
+  const left=Math.max(0, Math.ceil((pomo.end-Date.now())/1000));
+  const prev=pomo.remaining; pomo.remaining=left;
+  if(pomo.mode==='focus' && prev>left) credit(prev-left);
+  paintPomo();
+  if(document.hidden) pushBg(false);
+  if(left<=0) finishPomo();
+}
+function pushBg(force){
+  if(!pomo.running) return;
+  const title=(pomo.mode==='focus'?'🍅 Focus · ':'☕ Break · ')+fmt(pomo.remaining);
+  const subj=SUBJECTS.find(s=>s.id===pomo.book); const ch=subj&&subj.chapters.find(c=>c.id===pomo.chapter);
+  const body=(pomo.mode==='focus'?'Focus':'Break')+(subj?' · '+subj.name:'')+(ch?' · '+ch.name:'')+' · Session '+pomo.session;
+  showNotif(title, body, true);
+  notifySW('POMODORO_SYNC',{end:pomo.end, mode:pomo.mode, titleFocus:'🍅 Focus', titleBreak:'☕ Break', bodyBase:body, session:pomo.session});
+}
+function finishPomo(){
+  clearInterval(pomo.timer); pomo.timer=null; pomo.running=false; playChime(); notifySW('POMODORO_STOP');
+  if(pomo.mode==='focus'){
+    const k=today(); pomoHistory[k]=(Number(pomoHistory[k])||0)+1; write(KEY.hist,pomoHistory);
+    const n=(Number(localStorage.getItem(KEY.pomo))||0)+1; localStorage.setItem(KEY.pomo,String(n));
+    showNotif('Focus complete','Break শুরু হচ্ছে।', false);
+    pomo.mode='break'; pomo.remaining=Math.max(1,Number(document.getElementById('breakMin').value)||5)*60;
+    toast('Focus শেষ — break চালু');
+  } else {
+    showNotif('Break finished','পরের focus শুরু।', false);
+    pomo.mode='focus'; pomo.session++; pomo.remaining=Math.max(1,Number(document.getElementById('focusMin').value)||25)*60;
+    toast('Break শেষ — focus চালু');
+  }
+  pomo.running=true; pomo.end=Date.now()+pomo.remaining*1000;
+  pomo.timer=setInterval(tick,500); savePomo(); paintPomo(); pushBg(true); paintDash();
+}
+function togglePomo(){
+  getAudio(true);
+  const sub=document.getElementById('pomoSub').value, ch=document.getElementById('pomoCh').value;
+  if(!sub||!ch){ toast('বিষয় ও অধ্যায় বেছে নাও'); return; }
+  pomo.book=sub; pomo.chapter=ch;
+  if(pomo.running){ clearInterval(pomo.timer); pomo.timer=null; pomo.running=false; pomo.remaining=Math.max(0,Math.ceil((pomo.end-Date.now())/1000)); notifySW('POMODORO_STOP'); }
+  else { if(pomo.remaining<=0) pomo.remaining=(pomo.mode==='focus'?Number(document.getElementById('focusMin').value):Number(document.getElementById('breakMin').value))*60; pomo.running=true; pomo.end=Date.now()+pomo.remaining*1000; pomo.timer=setInterval(tick,500); pushBg(true); }
+  savePomo(); paintPomo();
+}
+function resetPomo(){ clearInterval(pomo.timer); pomo.timer=null; pomo.running=false; pomo.mode='focus'; pomo.session=1; pomo.remaining=(Number(document.getElementById('focusMin').value)||25)*60; pomo.end=0; notifySW('POMODORO_STOP'); savePomo(); paintPomo(); }
+async function enableAlert(){
+  getAudio(true);
+  if(!('Notification' in window)){ toast('এই ব্রাউজারে নোটিফিকেশন নেই'); return; }
+  let perm=Notification.permission; if(perm!=='granted') perm=await Notification.requestPermission();
+  if(perm==='granted'){ await showNotif('SSC StudyHub','নোটিফিকেশন চালু। টাইমার চলাকালীন বারে সময় দেখা যাবে।', false); toast('Alert enabled'); }
+  else toast('Permission: '+perm);
+  document.getElementById('alertBtn').textContent = Notification.permission==='granted' ? 'Alert on' : 'Enable alert';
+}
+function fillSubs(){ document.getElementById('pomoSub').innerHTML=SUBJECTS.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join(''); fillCh(); }
+function fillCh(){ const s=SUBJECTS.find(x=>x.id===document.getElementById('pomoSub').value)||SUBJECTS[0]; document.getElementById('pomoCh').innerHTML=s.chapters.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(''); }
+function studyChapter(sid,cid){ openPomo(); document.getElementById('pomoSub').value=sid; fillCh(); document.getElementById('pomoCh').value=cid; }
+function openPomo(){ getAudio(true); document.getElementById('pomo').classList.add('show'); fillSubs(); if(pomo.book){ document.getElementById('pomoSub').value=pomo.book; fillCh(); if(pomo.chapter) document.getElementById('pomoCh').value=pomo.chapter; } paintPomo(); }
+function closePomo(){ document.getElementById('pomo').classList.remove('show'); }
+function restorePomo(){
+  const st=read(KEY.state,null); if(!st){ paintPomo(); return; }
+  pomo.mode=st.mode==='break'?'break':'focus'; pomo.session=st.session||1; pomo.book=st.book||''; pomo.chapter=st.chapter||'';
+  pomo.remaining=Number(st.remaining)|| (pomo.mode==='focus'?1500:300);
+  if(st.running && st.end){
+    const now=Date.now();
+    if(now<st.end){ pomo.remaining=Math.ceil((st.end-now)/1000); pomo.end=st.end; pomo.running=true; pomo.timer=setInterval(tick,500); }
+    else {
+      const over=now-st.end;
+      if(st.mode!=='break'){
+        const br=(Number(document.getElementById('breakMin').value)||5)*60*1000;
+        if(over<br){ pomo.mode='break'; pomo.end=st.end+br; pomo.remaining=Math.ceil((pomo.end-now)/1000); pomo.running=true; pomo.timer=setInterval(tick,500); toast('Break চলছে'); }
+        else { pomo.mode='focus'; pomo.session++; pomo.remaining=(Number(document.getElementById('focusMin').value)||25)*60; pomo.end=Date.now()+pomo.remaining*1000; pomo.running=true; pomo.timer=setInterval(tick,500); toast('পরের focus চালু'); }
+      } else { pomo.mode='focus'; pomo.session++; pomo.remaining=(Number(document.getElementById('focusMin').value)||25)*60; pomo.end=Date.now()+pomo.remaining*1000; pomo.running=true; pomo.timer=setInterval(tick,500); }
+    }
+  }
+  savePomo(); paintPomo();
+}
+function boot(){ renderSyllabus(); renderGoals(); paintDash(); }
+document.addEventListener('visibilitychange',()=>{ if(document.hidden && pomo.running){ savePomo(); pushBg(true);} if(!document.hidden && pomo.running && pomo.end && Date.now()>=pomo.end) tick(); });
+window.addEventListener('beforeunload', savePomo);
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js?v=2026-11-03-ssc-a',{scope:'./'}).then(r=>{swReg=r;}).catch(()=>{}); }
+applyTheme(localStorage.getItem(KEY.theme)||'dark');
+boot(); restorePomo();
+document.getElementById('alertBtn').textContent = ('Notification' in window && Notification.permission==='granted') ? 'Alert on' : 'Enable alert';
+</script>
 </body>
 </html>
