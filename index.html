@@ -3707,7 +3707,7 @@ function switchTab(t, opts){
     if(t==="notes")renderNotes();
     if(t==="revision")renderRevision();
     if(t==="reports")renderReports();
-    try{localStorage.setItem("syllabusActiveTab",t);}catch(e){}
+    try{localStorage.setItem("sscHub_activeTab",t);}catch(e){}
 
     if(opts && opts.scroll){
       const panel = document.getElementById(t + "Panel");
@@ -5860,7 +5860,6 @@ scheduleMidnightRefresh();
 
 document.addEventListener("keydown", (e) => {
     if(e.key !== "Escape") return;
-    }
     const modals = ["clearHistoryModal","resetDailyGoalModal","alertEnabledModal","deleteExamModal","resetModal","examModal","todoModal","todoMultiModal","todoChapterSyncModal","todoDeleteModal","todoRescheduleModal","noteDeleteModal","revisionIntervalModal","noteModal","revisionModal"];
     for(const id of modals){
         const m = document.getElementById(id);
@@ -7016,7 +7015,7 @@ function init(){
     window.addEventListener("pagehide",saveOnLeave);
     // Stay on the same tab after a reload (e.g. Community).
     try{
-        const t=localStorage.getItem("syllabusActiveTab");
+        const t=localStorage.getItem("sscHub_activeTab");
         if(t&&t!=="syllabus"&&document.getElementById(t+"Panel"))switchTab(t);
     }catch(e){}
 }
