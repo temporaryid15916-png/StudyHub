@@ -876,6 +876,26 @@ html.dark .subject-icon {
     gap: 14px;
     align-items: stretch;
 }
+.pomo-grid > .pomo-card,
+.pomo-right-col > .pomo-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.pomo-right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+    min-width: 0;
+}
+.pomo-right-col > .pomo-card:first-child {
+    height: auto;
+    flex: none;
+}
+.pomo-right-col > .pomo-card:last-child {
+    flex: 1;
+}
 .pomo-card {
     background: rgba(18, 20, 40, .78);
     border: 1px solid rgba(129,140,248,.22);
@@ -1084,8 +1104,9 @@ html.dark .subject-icon {
 .pomo-dot.now { background: #818cf8; box-shadow: 0 0 0 3px rgba(129,140,248,.35); }
 .pomo-bottom {
     display: grid;
-    grid-template-columns: 1.1fr 1.2fr 0.9fr;
+    grid-template-columns: 1.1fr 1.2fr;
     gap: 12px;
+    align-items: stretch;
 }
 .pomo-motivation {
     display: flex;
@@ -1102,6 +1123,69 @@ html.dark .subject-icon {
     font-size: 12px;
     color: #c7d2fe;
     margin-top: 4px;
+}
+.pomo-7d-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 112px;
+    padding-top: 10px;
+    margin-top: auto;
+}
+.pomo-7d-col {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+}
+.pomo-7d-val {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--muted);
+    white-space: nowrap;
+}
+.pomo-7d-track {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    border-radius: 7px;
+    padding: 2px;
+}
+.pomo-7d-bar {
+    width: 100%;
+    max-width: 26px;
+    min-height: 4px;
+    border-radius: 5px 5px 3px 3px;
+    background: linear-gradient(180deg, var(--purple), var(--primary));
+    transition: height .35s ease;
+}
+.pomo-7d-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+}
+.pomo-plain-tips {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted);
+    padding: 2px 4px;
+    margin-top: 2px;
+    text-align: center;
+}
+.pomo-plain-tips strong {
+    color: var(--text);
+    font-weight: 700;
+    margin-right: 4px;
+}
+@media (max-width: 960px) {
+    .pomo-bottom { grid-template-columns: 1fr; }
 }
 .pomo-box { display: none; } /* legacy class kept for safety */
 html:not(.dark) .pomo {
@@ -1120,7 +1204,76 @@ html:not(.dark) .pomo {
   .pomo-stat-grid { grid-template-columns: 1fr 1fr; }
   .pomo-top-actions .pomo-chip { font-size: 11px; padding: 6px 10px; }
 }
-
+/* ========== REPORTS (monthly archive + calendar) ========== */
+.rep-archive{
+  display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+}
+.rep-arch-card{
+  flex:0 0 min(200px,78vw);scroll-snap-align:start;
+  border:1px solid var(--border);border-radius:16px;padding:12px 14px;
+  background:var(--card);cursor:pointer;text-align:left;
+  transition:border-color .15s,box-shadow .15s,transform .15s;
+}
+.rep-arch-card:hover{border-color:color-mix(in srgb,var(--primary) 40%,var(--border));transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.rep-arch-card.active{
+  border-color:var(--primary);
+  background:linear-gradient(145deg,var(--primary-soft),var(--card));
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--primary) 35%,transparent),var(--shadow);
+}
+.rep-arch-card .rep-arch-m{font-size:12px;font-weight:750;color:var(--text)}
+.rep-arch-card .rep-arch-t{font-size:20px;font-weight:800;letter-spacing:-.03em;margin-top:6px}
+.rep-arch-card .rep-arch-s{font-size:11px;color:var(--muted);margin-top:2px}
+.rep-arch-card .progress{margin-top:8px;height:6px}
+.rep-main-grid{
+  display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.9fr);
+  gap:12px;margin-bottom:12px;align-items:start;
+}
+.rep-cal-head{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;
+  margin-bottom:6px;font-size:10px;font-weight:700;color:var(--muted);text-align:center;
+}
+.rep-cal-grid{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;
+}
+.rep-cal-cell{
+  aspect-ratio:1;max-height:48px;border-radius:12px;border:1px solid var(--border);
+  background:var(--soft);display:grid;place-items:center;font-size:12.5px;font-weight:700;
+  color:var(--muted);cursor:default;user-select:none;
+}
+.rep-cal-cell.pad{visibility:hidden;pointer-events:none;border:0;background:transparent}
+.rep-cal-cell.studied{
+  background:color-mix(in srgb,#34d399 22%,var(--card));
+  border-color:color-mix(in srgb,#34d399 45%,var(--border));
+  color:var(--text);cursor:pointer;
+}
+.rep-cal-cell.studied:hover{filter:brightness(1.06)}
+.rep-cal-cell.selected{
+  background:linear-gradient(135deg,#f59e0b,#fbbf24)!important;
+  border-color:transparent!important;color:#111!important;
+  box-shadow:0 6px 16px -6px rgba(245,158,11,.55);cursor:pointer;
+}
+.rep-cal-cell.future{opacity:.35;cursor:default}
+.rep-legend{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:10px;font-size:11px;color:var(--muted)}
+.rep-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle;border:1px solid var(--border)}
+.rep-dot.studied{background:#34d399;border-color:transparent}
+.rep-dot.selected{background:#fbbf24;border-color:transparent}
+.rep-dot.empty{background:var(--soft)}
+.rep-day-detail{min-height:120px}
+.rep-day-detail .rep-day-kicker{font-size:11px;font-weight:700;color:var(--primary);margin-bottom:4px}
+.rep-day-detail .rep-day-time{font-size:22px;font-weight:800;letter-spacing:-.03em}
+.rep-day-detail .rep-sub-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.rep-day-detail .rep-sub-row:last-child{border-bottom:0}
+.rep-summary-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.rep-day-table .listrow{cursor:pointer;border-radius:10px;padding:8px 10px;border:1px solid transparent}
+.rep-day-table .listrow:hover{border-color:color-mix(in srgb,var(--primary) 30%,var(--border));background:var(--soft)}
+.rep-day-table .listrow.active-day{border-color:var(--primary);background:var(--primary-soft)}
+.rep-sub-bar{height:6px;border-radius:99px;background:var(--soft);overflow:hidden;margin-top:4px}
+.rep-sub-bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--purple))}
+@media (max-width:760px){
+  .rep-main-grid,.rep-summary-split{grid-template-columns:1fr}
+  .rep-cal-cell{max-height:42px;border-radius:10px;font-size:12px}
+}
 /* ========== HISTORY & INSIGHTS ========== */
 .history-grid {
     display: grid;
@@ -2688,7 +2841,6 @@ html.dark .dash-achieve { background: radial-gradient(300px 140px at 100% 0%, rg
 .brand-icon img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 6px 14px rgba(91, 92, 230, .45)); }
 body::after { display: none; }   
 </style>
-
 <style id="warmTypographyStyle">
 /* ===== WARM TYPOGRAPHY LAYER (fonts and text style only; Community and Pomodoro keep their own look) ===== */
 body{font-family:"Nunito","Hind Siliguri","Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:0;line-height:1.55;font-size:14.5px;font-weight:500}
@@ -3773,6 +3925,113 @@ html.dark .dash-stat-icon.ico-exam {
     } catch (_e) {}
   }
 </script>
+<style id="polishLayerV3">
+/* ===== POLISH LAYER v3 — purely additive, scoped to editable sections only.
+   Never targets #dashHome, #communityPanel, community-v2-*, progress/animation canvases or timer logic. ===== */
+:root{--pl-r:16px;--pl-r-sm:11px;--pl-sh:0 1px 2px rgba(15,18,40,.05),0 6px 18px -10px rgba(15,18,40,.14);--pl-sh-h:0 2px 4px rgba(15,18,40,.06),0 12px 26px -12px rgba(15,18,40,.22);--pl-ring:0 0 0 3px color-mix(in srgb,var(--primary) 22%,transparent)}
+html.dark{--pl-sh:0 1px 2px rgba(0,0,0,.35),0 8px 22px -12px rgba(0,0,0,.6);--pl-sh-h:0 2px 4px rgba(0,0,0,.4),0 14px 30px -14px rgba(0,0,0,.7)}
+
+/* ---- cards & section headers inside editable panels ---- */
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .card{border-radius:var(--pl-r);border:1px solid var(--border);box-shadow:var(--pl-sh);transition:box-shadow .2s ease,border-color .2s ease}
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .card:hover{box-shadow:var(--pl-sh-h)}
+:is(#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) h2{font-size:17px;font-weight:800;letter-spacing:-.015em;line-height:1.3}
+:is(#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) h3{font-weight:750;letter-spacing:-.01em}
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .sub{color:var(--muted);line-height:1.5}
+
+/* ---- inputs, selects, textareas ---- */
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel,#examModal,#todoModal,#todoMultiModal,#todoRescheduleModal,#revisionIntervalModal) :is(.input,.select,input[type=text],input[type=number],input[type=date],input[type=time],textarea,select){border-radius:var(--pl-r-sm);border:1px solid var(--border);background:color-mix(in srgb,var(--soft) 55%,var(--card));color:var(--text);transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel,#examModal,#todoModal,#todoMultiModal,#todoRescheduleModal,#revisionIntervalModal) :is(.input,.select,input,textarea,select):focus{outline:none;border-color:var(--primary);box-shadow:var(--pl-ring);background:var(--card)}
+
+/* ---- buttons & filters ---- */
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel,#examModal,#todoModal,#todoMultiModal) .btn{border-radius:var(--pl-r-sm);font-weight:700;letter-spacing:.005em}
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .btn:focus-visible,:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .filter:focus-visible{outline:none;box-shadow:var(--pl-ring)}
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .filters{gap:6px;row-gap:8px;align-items:center}
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .filter{font-weight:650;border:1px solid var(--border);transition:background .15s ease,border-color .15s ease,color .15s ease}
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .filter:not(.active):hover{border-color:color-mix(in srgb,var(--primary) 40%,var(--border))}
+
+/* ---- list rows ---- */
+:is(#examsPanel,#todoPanel,#historyPanel,#notesPanel,#revisionPanel,#reportsPanel) .list{gap:10px}
+#syllabusPanel .toolbar{padding:14px 16px}
+#syllabusPanel .toolbar-top{gap:10px}
+
+/* ---- modals (explicit ids; community modals excluded) ---- */
+:is(#clearHistoryModal,#resetDailyGoalModal,#alertEnabledModal,#deleteExamModal,#resetModal,#examModal,#todoModal,#todoMultiModal,#todoChapterSyncModal,#todoDeleteModal,#todoRescheduleModal,#noteDeleteModal,#revisionIntervalModal) .modalbox{border-radius:22px;padding:24px 22px;box-shadow:0 28px 60px -22px rgba(8,10,30,.55);max-width:min(560px,calc(100vw - 28px))}
+:is(#clearHistoryModal,#resetDailyGoalModal,#alertEnabledModal,#deleteExamModal,#resetModal,#examModal,#todoModal,#todoMultiModal,#todoChapterSyncModal,#todoDeleteModal,#todoRescheduleModal,#noteDeleteModal,#revisionIntervalModal) h3{font-size:18px;font-weight:800;letter-spacing:-.015em}
+:is(#todoModal,#todoMultiModal,#examModal) .modalbox{max-height:calc(100dvh - 32px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+:is(#clearHistoryModal,#resetDailyGoalModal,#alertEnabledModal,#deleteExamModal,#resetModal,#examModal,#todoModal,#todoMultiModal,#todoChapterSyncModal,#todoDeleteModal,#todoRescheduleModal,#noteDeleteModal,#revisionIntervalModal) .modal-actions{gap:8px;flex-wrap:wrap}
+
+/* ---- empty states (only where the app already renders .empty) ---- */
+:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .empty{border:1px dashed var(--border);border-radius:var(--pl-r);padding:26px 16px;color:var(--muted);text-align:center;background:color-mix(in srgb,var(--soft) 35%,transparent)}
+
+/* ---- Pomodoro: visual-only refinements (no layout identity change, no logic) ---- */
+#pomodoroOverlay .pomo-clock{font-variant-numeric:tabular-nums;letter-spacing:-.02em;font-weight:800}
+#pomodoroOverlay .pomo-mode-label{letter-spacing:.14em;font-weight:800;font-size:11.5px;opacity:.85}
+#pomodoroOverlay .pomo-encourage{font-size:13px;opacity:.8}
+#pomodoroOverlay .pomo-topic{font-weight:650;line-height:1.45}
+#pomodoroOverlay .pomo-chip{border-radius:99px;font-weight:700;padding:6px 12px}
+#pomodoroOverlay .pomo-stat-tile{border-radius:14px;transition:transform .15s ease,border-color .15s ease}
+#pomodoroOverlay .pomo-stat-tile .k{font-size:11.5px;letter-spacing:.02em}
+#pomodoroOverlay .pomo-stat-tile .v{font-variant-numeric:tabular-nums;font-weight:800}
+#pomodoroOverlay .btn{border-radius:13px;font-weight:750}
+#pomodoroOverlay .pomo-start-main{min-height:48px;padding-left:26px;padding-right:26px;font-size:15px;letter-spacing:.01em}
+#pomodoroOverlay .btn:focus-visible,#pomodoroOverlay :is(input,select):focus-visible{outline:none;box-shadow:var(--pl-ring)}
+#pomodoroOverlay :is(.input,.select){border-radius:11px}
+@media (max-width:560px){
+  #pomodoroOverlay .pomo-clock{font-size:clamp(44px,15vw,64px)}
+  #pomodoroOverlay .pomo-start-main{width:100%}
+  #pomodoroOverlay .pomo-chip{font-size:11.5px;padding:5px 10px}
+}
+@media (max-width:560px){
+  :is(#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .card{border-radius:14px}
+  :is(#clearHistoryModal,#resetDailyGoalModal,#alertEnabledModal,#deleteExamModal,#resetModal,#examModal,#todoModal,#todoMultiModal,#todoChapterSyncModal,#todoDeleteModal,#todoRescheduleModal,#noteDeleteModal,#revisionIntervalModal) .modalbox{padding:20px 16px}
+}
+@media (prefers-reduced-motion:reduce){:is(#syllabusPanel,#examsPanel,#todoPanel,#historyPanel,#insightsPanel,#notesPanel,#revisionPanel,#reportsPanel) .card{transition:none}}
+</style>
+<style id="chapterFxStyle">
+/* ===== Syllabus chapter fix + feedback animations (scoped to #syllabusPanel only) ===== */
+/* 1) Stop already-complete chapters replaying their pop animation each time the list re-renders */
+#syllabusPanel .chapter.complete .num,#syllabusPanel .status.complete{animation:none}
+/* 2) No hover/press movement on the syllabus list, so a re-render under the cursor never makes rows or cards jump */
+#syllabusPanel .subject:hover,#syllabusPanel .card.subject:hover{transform:none}
+#syllabusPanel .chapter:hover,#syllabusPanel .chapter:active{transform:none}
+/* 3) One-shot feedback, only on the chapter that was just clicked */
+@keyframes chFxSweep{0%{background-position:-120% 0}100%{background-position:220% 0}}
+@keyframes chFxPulse{0%{box-shadow:0 0 0 0 rgba(245,158,11,.55)}100%{box-shadow:0 0 0 14px rgba(245,158,11,0)}}
+@keyframes chFxGlow{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--success) 55%,transparent)}100%{box-shadow:0 0 0 16px transparent}}
+@keyframes chFxPop{0%{transform:scale(.55) rotate(-14deg)}55%{transform:scale(1.22) rotate(5deg)}100%{transform:none}}
+#syllabusPanel .chapter.fx-prog{background-image:linear-gradient(100deg,transparent 30%,color-mix(in srgb,var(--warning) 28%,transparent) 50%,transparent 70%);background-size:60% 100%;background-repeat:no-repeat;animation:chFxSweep .9s ease-out 1}
+#syllabusPanel .chapter.fx-prog .num{animation:chFxPulse .9s ease-out 1}
+#syllabusPanel .chapter.fx-done .num{animation:chFxPop .5s var(--spring,ease-out) 1,chFxGlow .9s ease-out 1}
+#syllabusPanel .chapter.fx-done .status,#syllabusPanel .chapter.fx-done .mini.status{animation:chFxPop .45s var(--spring,ease-out) 1}
+.fx-confetti.fx-lg{width:9px;height:13px}
+@media (prefers-reduced-motion:reduce){#syllabusPanel .chapter.fx-prog,#syllabusPanel .chapter.fx-prog .num,#syllabusPanel .chapter.fx-done .num,#syllabusPanel .chapter.fx-done .status,#syllabusPanel .chapter.fx-done .mini.status{animation:none}}
+</style>
+<style id="pomoSettingsCompactV1">
+/* ===== Pomodoro "Session Settings" card — compact redesign. CSS only: same elements, IDs and handlers. ===== */
+html:root:root #pomodoroOverlay .pomo-grid>.pomo-card:first-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-content:start;padding:14px}
+#pomodoroOverlay .pomo-grid>.pomo-card:first-child>h3{grid-column:1/-1;margin:0 0 2px;font-size:13px;letter-spacing:.01em}
+/* the four number fields become small tiles: label on top, big value below */
+html:root:root #pomodoroOverlay .pomo-card:first-child .pomo-setting-row{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:3px;padding:8px 11px 7px;border:1px solid var(--border);border-radius:13px;background:color-mix(in srgb,var(--soft) 62%,transparent);transition:border-color .15s ease,box-shadow .15s ease;min-width:0}
+html:root:root #pomodoroOverlay .pomo-card:first-child .pomo-setting-row:last-of-type{border-bottom:1px solid var(--border)}
+html:root:root #pomodoroOverlay .pomo-card:first-child .pomo-setting-row:focus-within{border-color:var(--primary);box-shadow:var(--pl-ring,0 0 0 3px color-mix(in srgb,var(--primary) 22%,transparent))}
+html:root:root #pomodoroOverlay .pomo-card:first-child .pomo-setting-row label{font-size:10.5px;font-weight:700;letter-spacing:.03em;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html:root:root #pomodoroOverlay .pomo-card:first-child .pomo-setting-row input.input{width:100%;padding:0;border:0;background:transparent;box-shadow:none;text-align:left;font-size:20px;font-weight:800;line-height:1.15;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--text);-moz-appearance:textfield;appearance:textfield}
+#pomodoroOverlay .pomo-card:first-child .pomo-setting-row input.input::-webkit-outer-spin-button,#pomodoroOverlay .pomo-card:first-child .pomo-setting-row input.input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+html:root:root #pomodoroOverlay .pomo-card:first-child .pomo-setting-row input.input:focus{outline:none;box-shadow:none;border:0;background:transparent}
+/* sound row: full width, label left / select right */
+html:root:root #pomodoroOverlay .pomo-card:first-child .pomo-setting-row:has(#pomoSoundSelect){grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between;padding:6px 8px 6px 11px}
+html:root:root #pomodoroOverlay #pomoSoundSelect{width:auto!important;flex:1 1 0;max-width:62%;min-width:0;padding:6px 8px;border-radius:9px;font-size:12px;text-align:left}
+/* Preview + Apply side by side */
+#pomodoroOverlay .pomo-card:first-child>div[style*="margin-top:6px"],#pomodoroOverlay .pomo-card:first-child>div[style*="margin-top:10px"]{margin-top:0!important}
+#pomodoroOverlay .pomo-card:first-child .btn{min-height:38px;padding:8px 10px;font-size:12.5px;border-radius:11px;white-space:nowrap}
+html:root:root #pomodoroOverlay .pomo-card:first-child button[onclick^="previewPomoSound"]{background:var(--soft)!important;color:var(--text)!important;border:1px solid var(--border)!important}
+/* Book / Chapter pickers: two columns, tight */
+html:root:root #pomodoroOverlay .pomo-card:first-child .pomo-pickers{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:2px!important;padding-top:8px;border-top:1px solid var(--border)}
+#pomodoroOverlay .pomo-pickers .label{font-size:10.5px;font-weight:700;letter-spacing:.03em;margin-bottom:3px;display:block}
+#pomodoroOverlay .pomo-pickers .select{width:100%;min-width:0;text-overflow:ellipsis;padding:7px 8px;border-radius:10px;font-size:12px}
+@media (max-width:960px){html:root:root #pomodoroOverlay .pomo-grid>.pomo-card:first-child{gap:7px;padding:12px}}
+@media (max-width:380px){html:root:root #pomodoroOverlay .pomo-card:first-child .pomo-setting-row input.input{font-size:18px}}
+</style>
 </head>
 
 
@@ -4046,36 +4305,80 @@ html.dark .dash-stat-icon.ico-exam {
   </div>
 </section>
 
-<!-- Reports Tab (Heatmap + Weekly/Monthly) -->
+<!-- Reports Tab — Monthly Study Reports -->
 <section id="reportsPanel" class="panel">
-  <div class="card section">
-    <h2>🔥 Study Activity Heatmap</h2>
-    <p class="sub">Daily study activity heatmap (uses your Pomodoro history)</p>
-    <div id="heatmapContainer" style="overflow-x:auto;margin-top:12px"></div>
-    <div id="heatmapDetail" class="sub" style="margin-top:8px">Click a day for details</div>
+  <div class="card section rep-head">
+    <div class="row" style="flex-wrap:wrap;gap:12px;align-items:flex-start">
+      <div style="flex:1;min-width:200px">
+        <h2 style="margin:0;display:flex;align-items:center;gap:8px"><span aria-hidden="true">📊</span> Study Report</h2>
+        <p class="sub" style="margin-top:4px">তোমার পড়ার অগ্রগতি দেখো, মাসভিত্তিক রিপোর্ট এখানে</p>
+      </div>
+      <button type="button" class="btn primary" id="btnReportPdf" onclick="downloadMonthlyReportPdf()">⬇ Download PDF</button>
+    </div>
   </div>
-  <div class="card section">
-    <div class="row" style="margin-bottom:10px;flex-wrap:wrap;gap:8px">
-      <div><h2>📈 Weekly & Monthly Reports</h2><p class="sub">Accurate totals from your study history and progress</p></div>
-      <div>
-        <button class="filter active" id="btnReportWeekly" onclick="setReportPeriod('weekly')">Weekly</button>
-        <button class="filter" id="btnReportMonthly" onclick="setReportPeriod('monthly')">Monthly</button>
+
+  <div class="card section" style="padding-top:12px;padding-bottom:12px">
+    <div class="row" style="margin-bottom:10px;align-items:center">
+      <h3 style="margin:0;font-size:13px;font-weight:750">📁 Monthly archive</h3>
+      <div style="display:flex;gap:6px">
+        <button type="button" class="mini" id="btnReportPrev" onclick="shiftReportMonth(-1)" title="Older">←</button>
+        <button type="button" class="mini" id="btnReportNext" onclick="shiftReportMonth(1)" title="Newer">→</button>
       </div>
     </div>
-    <div id="reportSummary" class="grid4" style="margin-bottom:12px"></div>
-    <div id="reportSubjectList" class="list"></div>
+    <div id="reportMonthArchive" class="rep-archive"></div>
   </div>
+
+  <div class="rep-main-grid">
+    <div class="card section rep-cal-card">
+      <div class="row" style="margin-bottom:10px">
+        <h3 id="reportMonthLabel" style="margin:0;font-size:15px;font-weight:800"></h3>
+      </div>
+      <div class="rep-cal-head" aria-hidden="true">
+        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+      </div>
+      <div id="reportCalendar" class="rep-cal-grid"></div>
+      <div class="rep-legend">
+        <span><i class="rep-dot studied"></i> পড়াশোনা হয়েছে</span>
+        <span><i class="rep-dot selected"></i> নির্বাচিত দিন</span>
+        <span><i class="rep-dot empty"></i> পড়াশোনা হয়নি</span>
+      </div>
+    </div>
+
+    <div class="card section rep-detail-card">
+      <div class="row" style="margin-bottom:8px">
+        <h3 style="margin:0;font-size:14px;font-weight:750" id="reportDayTitle">দিনের রিপোর্ট</h3>
+      </div>
+      <div id="reportDayDetail" class="rep-day-detail">
+        <div class="community-empty">Calendar থেকে একটি তারিখ বেছে নাও</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h3 style="margin:0 0 12px;font-size:15px;font-weight:800">📊 মাসিক সারসংক্ষেপ — <span id="reportSummaryMonth"></span></h3>
+    <div id="reportSummary" class="grid4" style="margin-bottom:14px"></div>
+    <div class="rep-summary-split">
+      <div>
+        <h4 style="margin:0 0 8px;font-size:13px;font-weight:750">বিষয়ভিত্তিক সময় বণ্টন</h4>
+        <div id="reportSubjectList" class="list"></div>
+      </div>
+      <div>
+        <div class="row" style="margin-bottom:8px">
+          <h4 style="margin:0;font-size:13px;font-weight:750">দৈনিক পড়ার ইতিহাস</h4>
+          <span class="sub" id="reportDayListHint"></span>
+        </div>
+        <div id="reportDayList" class="list rep-day-table"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="card section">
     <h2>⚡ Smart Catch-up</h2>
     <p class="sub">Missed or overdue tasks from your To-Do list (never auto-deletes)</p>
     <div id="catchupList" class="list"></div>
   </div>
 </section>
-
-<!-- Community Tab: independent module; existing tracker panels remain unchanged -->
-
 </main>
-
 
 
 <div id="pomoFloatingTimer" class="pomo-floating" role="button" aria-label="Open Pomodoro" title="Drag left/right · Tap to open"></div>
@@ -4172,45 +4475,29 @@ html.dark .dash-stat-icon.ico-exam {
         </div>
       </div>
 
-      <!-- Right: session progress -->
-      <div class="pomo-card">
-        <h3>📊 Session Progress</h3>
-        <div class="pomo-progress-head">
-          <div id="pomoSideRing" class="pomo-side-ring" style="--side-pct:0"><span id="pomoSideRingText">0.00%</span></div>
-          <div>
-            <div style="font-size:20px;font-weight:800;color:#f8fafc" id="pomoSessionsToday">0</div>
-            <div style="font-size:11px;color:#94a3b8">Sessions today</div>
-            <div style="font-size:12px;color:#a5b4fc;margin-top:4px" id="pomoStudyToday">0m study</div>
+    <!-- Right Column: Today's Stats + Last 7 Days Study History -->
+      <div class="pomo-right-col">
+        <div class="pomo-card">
+          <h3>🏆 Today's Stats</h3>
+          <div class="pomo-stat-grid">
+            <div class="pomo-stat-tile"><div class="k">⏱️ Study time</div><div class="v" id="pomoStatTime">0m</div></div>
+            <div class="pomo-stat-tile"><div class="k">🍅 Sessions</div><div class="v" id="pomoStatSessions">0</div></div>
+            <div class="pomo-stat-tile"><div class="k">🎯 Goal</div><div class="v" id="pomoStatGoal">0.00%</div></div>
+            <div class="pomo-stat-tile"><div class="k">🔥 Streak</div><div class="v" id="pomoStatStreak">0</div></div>
           </div>
         </div>
-        <div class="pomo-stat-grid">
-          <div class="pomo-stat-tile"><div class="k">🎯 Daily goal</div><div class="v" id="pomoGoalPct">0.00%</div></div>
-          <div class="pomo-stat-tile"><div class="k">🔥 Streak</div><div class="v" id="pomoStreakStat">0</div></div>
+
+        <div class="pomo-card">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+            <h3 style="margin:0">📊 Last 7 Days Study History</h3>
+            <span style="font-size:11px;color:var(--muted)" id="pomoLast7Total">0m</span>
+          </div>
+          <div id="pomoLast7Bars" class="pomo-7d-chart"></div>
         </div>
-        <div style="margin-top:12px;font-size:11px;font-weight:700;color:#94a3b8">This week</div>
-        <div id="pomoWeekBars" class="pomo-week-mini"></div>
       </div>
     </div>
-
-    <div class="pomo-bottom">
-      <div class="pomo-card">
-        <h3>🏆 Today's Stats</h3>
-        <div class="pomo-stat-grid">
-          <div class="pomo-stat-tile"><div class="k">⏱️ Study time</div><div class="v" id="pomoStatTime">0m</div></div>
-          <div class="pomo-stat-tile"><div class="k">🍅 Sessions</div><div class="v" id="pomoStatSessions">0</div></div>
-          <div class="pomo-stat-tile"><div class="k">🎯 Goal</div><div class="v" id="pomoStatGoal">0.00%</div></div>
-          <div class="pomo-stat-tile"><div class="k">🔥 Streak</div><div class="v" id="pomoStatStreak">0</div></div>
-        </div>
-      </div>
-      <div class="pomo-card pomo-motivation">
-        <div class="big">Stay Focused!</div>
-        <div class="subm">Your hard work will pay off 💜</div>
-        <div class="subm" style="margin-top:10px" id="pomoMotivationExtra">Select a chapter and press Start.</div>
-      </div>
-      <div class="pomo-card" style="display:flex;flex-direction:column;justify-content:center;gap:8px">
-        <div style="font-size:12px;color:#94a3b8;font-weight:700">Tips</div>
-        <div style="font-size:12.5px;color:#e2e8f0;line-height:1.45">Focus sessions auto-start the next break. Long break runs every cycle. Sound & alerts work as before.</div>
-      </div>
+    <div class="pomo-plain-tips">
+      <strong>Tips:</strong> Focus sessions auto-start the next break. Long break runs every cycle. Sound &amp; alerts work as before.
     </div>
   </div>
 </div>
@@ -4235,7 +4522,7 @@ html.dark .dash-stat-icon.ico-exam {
     <div style="display:grid;gap:9px;margin-top:12px">
       <div>
         <label class="label">Task title</label>
-        <input id="todoInputTitle" class="input" maxlength="120" placeholder="e.g. Physics Ch-3 revise">
+        <input id="todoInputTitle" class="input" maxlength="120" placeholder="e.g. পদার্থবিজ্ঞান Ch-3 revise">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div>
@@ -4612,7 +4899,7 @@ function setAppTheme(name){
   let reduce = false;
   try{ reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(_e){}
   if(__themeReady && prev && prev !== name && !reduce && document.startViewTransition){
-    try{ document.startViewTransition(apply); }catch(_e){ apply(); }
+    try{ const _vt=document.startViewTransition(apply); if(_vt){ ["ready","finished","updateCallbackDone"].forEach(k=>{ try{ _vt[k] && _vt[k].catch(()=>{}); }catch(_x){} }); } }catch(_e){ apply(); }
   }else{
     apply();
   }
@@ -4737,7 +5024,6 @@ function switchTab(t, opts){
     if(t==="revision")renderRevision();
     if(t==="reports")renderReports();
     try{localStorage.setItem("sscHub_activeTab",t);}catch(e){}
-
     if(opts && opts.scroll){
       const panel = document.getElementById(t + "Panel");
       if(panel){
@@ -5085,7 +5371,6 @@ function toggleChapterStatus(b,c){
     save(KEY.last,last);
     updateDashboard();
     renderSyllabus();
-    
     if(currentTab==="insights")renderInsights();
 }
 
@@ -5239,7 +5524,6 @@ function toggleExamChapterDone(b,c){
     save(KEY.last,last);
     updateDashboard();
     renderExamDetail();
-    
     renderSyllabus();
     if(currentTab==="insights")renderInsights();
 }
@@ -5858,7 +6142,7 @@ function updatePomoDisplay(){
 
     const enc=document.getElementById("pomoEncourage");
     if(enc){
-      if(pomo.running && pomo.mode==="focus") enc.textContent="Stay with it — you've got this 🚀";
+      if(pomo.running && pomo.mode==="focus") enc.textContent="Your hard work will pay off 💜";
       else if(pomo.mode==="break") enc.textContent="Rest well. Next focus is coming ☕";
       else if(pomo.awaitingNext) enc.textContent="Ready for the next session?";
       else enc.textContent="You can do it! 🚀";
@@ -5964,22 +6248,32 @@ function updatePomoDisplay(){
         tl.innerHTML=html;
       }
 
-      // week bars
-      const wb=document.getElementById("pomoWeekBars");
-      if(wb){
+     // last 7 days study history bar chart (Box 2)
+      const b7=document.getElementById("pomoLast7Bars");
+      if(b7){
         const labels=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
         const now=new Date();
-        const day=now.getDay();
-        const start=new Date(now.getFullYear(), now.getMonth(), now.getDate()-day);
-        let max=1; const vals=[];
-        for(let i=0;i<7;i++){
-          const dd=new Date(start.getFullYear(), start.getMonth(), start.getDate()+i);
+        const rows=[];
+        let maxSec=1, sumSec=0;
+        for(let i=6;i>=0;i--){
+          const dd=new Date(now.getFullYear(), now.getMonth(), now.getDate()-i);
           const k=formatDateKey(dd);
           let v=Number(history[k]?.totalSeconds||0);
           if(k===dayKey) v+=Math.round(pendingStudySeconds||0);
-          vals.push(v); if(v>max) max=v;
+          sumSec+=v;
+          if(v>maxSec) maxSec=v;
+          rows.push({ label: i===0 ? "Today" : labels[dd.getDay()], sec: v, key: k });
         }
-        wb.innerHTML=vals.map((v,i)=>`<div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end"><div class="b" style="height:${Math.max(4, Math.round(v/max*100))}%"></div><div class="lbl">${labels[i]}</div></div>`).join("");
+        setTxt("pomoLast7Total", "Total: " + (typeof fmt==="function" ? fmt(sumSec) : Math.round(sumSec/60)+"m"));
+        b7.innerHTML=rows.map(r=>{
+          const hPct=r.sec>0 ? Math.max(8, Math.round((r.sec/maxSec)*100)) : 4;
+          const shortLbl=r.sec>=3600 ? (r.sec/3600).toFixed(1)+"h" : (r.sec>=60 ? Math.round(r.sec/60)+"m" : (r.sec>0 ? r.sec+"s" : "0m"));
+          return `<div class="pomo-7d-col" title="${r.key}: ${typeof fmt==="function" ? fmt(r.sec) : r.sec+"s"}">` +
+            `<div class="pomo-7d-val">${shortLbl}</div>` +
+            `<div class="pomo-7d-track"><div class="pomo-7d-bar" style="height:${hPct}%"></div></div>` +
+            `<div class="pomo-7d-lbl">${r.label}</div>` +
+          `</div>`;
+        }).join("");
       }
 
       const extra=document.getElementById("pomoMotivationExtra");
@@ -6459,7 +6753,6 @@ function recordRecoveredFocusTime(startMs, endMs, book, chapter){
     }
     save(KEY.history, history);
     updateDashboard();
-    
 }
 
 function flushStudySeconds(force = false){
@@ -6494,7 +6787,6 @@ function flushStudySeconds(force = false){
     pendingStudyDay = today();
     save(KEY.history, history);
     updateDashboard();
-    
 }
 document.addEventListener("visibilitychange",()=>{
     checkMidnightChange();
@@ -6770,7 +7062,6 @@ function confirmClearStudyHistory(){
     closeClearHistoryModal();
     updateDashboard();
     renderHistory();
-    
     toast("🧹 Study history cleared");
 }
 
@@ -6857,7 +7148,6 @@ function confirmResetProgress(){
     closeResetModal();
     updateDashboard();
     renderSyllabus();
-    
     toast("✅ Syllabus progress reset");
 }
 
@@ -6870,14 +7160,6 @@ function checkMidnightChange(){
         currentDayKey = newDay;
         updateDashboard();
         if(currentTab==="history") renderHistory();
-        // Push shared community progress so today_seconds resets on server for other members.
-        try{}catch(_e){}
-        // Refresh community members panel so everyone's Today shows 0 when updated_at is yesterday.
-        try{
-          if(typeof communityCurrent!=="undefined"&&communityCurrent?.id!=null&&typeof communityLoadMembers==="function"){
-            communityLoadMembers(communityCurrent.id,true);
-          }
-        }catch(_e){}
     }
 }
 
@@ -6898,8 +7180,6 @@ scheduleMidnightRefresh();
 
 document.addEventListener("keydown", (e) => {
     if(e.key !== "Escape") return;
-    const leave = document.getElementById("communityLeaveConfirmModal");
-    if(leave && leave.classList.contains("show")){ closeCommunityLeaveConfirm(); return; }
     const modals = ["clearHistoryModal","resetDailyGoalModal","alertEnabledModal","deleteExamModal","resetModal","examModal","todoModal","todoMultiModal","todoChapterSyncModal","todoDeleteModal","todoRescheduleModal","noteDeleteModal","revisionIntervalModal","noteModal","revisionModal"];
     for(const id of modals){
         const m = document.getElementById(id);
@@ -7389,7 +7669,8 @@ function closeTodoChapterSyncModal(yes){
 /* ========== NEW FEATURES: Notes, Revision, Reports, Heatmap, Goals, Catch-up ========== */
 const noteKey = (b,c) => b + "__" + c;
 let revFilter = "upcoming";
-let reportPeriod = "weekly";
+let reportMonthOffset = 0;
+let reportSelectedDay = null;
 let editingNoteId = null;
 let pendingNoteDeleteId = null;
 
@@ -7625,93 +7906,274 @@ function confirmRevisionInterval(){
   toast("Interval set to "+n+" days");
 }
 
-function renderHeatmap(){
-  const box = document.getElementById("heatmapContainer");
-  if(!box) return;
-  const year = new Date().getFullYear();
-  const start = new Date(year, 0, 1);
-  const end = new Date(year, 11, 31);
-  let html = `<div style="display:flex;gap:3px;align-items:flex-start;font-size:10px">`;
-  let cur = new Date(start);
-  while(cur.getDay() !== 0) cur.setDate(cur.getDate()-1);
-  const vals = Object.values(history || {}).map(h=>Number(h?.totalSeconds||0));
-  const maxSec = Math.max(1, ...(vals.length ? vals : [0]));
-  while(cur <= end || cur.getDay() !== 0){
-    if(cur.getDay()===0) html += `<div style="display:flex;flex-direction:column;gap:3px">`;
-    const key = formatDateKey(cur);
-    const sec = Number(history[key]?.totalSeconds||0);
-    const level = sec<=0 ? 0 : sec < maxSec*0.25 ? 1 : sec < maxSec*0.5 ? 2 : sec < maxSec*0.75 ? 3 : 4;
-    const colors = ["var(--soft)","#c7d2fe","#818cf8","#4f46e5","#312e81"];
-    const inYear = cur.getFullYear()===year;
-    html += `<div title="${key}: ${fmt(sec)}" data-heat="${key}" style="width:12px;height:12px;border-radius:2px;background:${inYear?colors[level]:'transparent'};cursor:pointer"></div>`;
-    if(cur.getDay()===6) html += `</div>`;
-    cur.setDate(cur.getDate()+1);
-    if(cur > end && cur.getDay()===0) break;
-  }
-  html += `</div>`;
-  box.innerHTML = html;
-}
-function showHeatDetail(key){
-  const el = document.getElementById("heatmapDetail");
-  if(!el) return;
-  const h = history[key];
-  if(!h || !h.totalSeconds){ el.textContent = key + " — No study recorded"; return; }
-  const books = Object.entries(h.byBook||{}).map(([b,s])=>`${b}: ${fmt(s)}`).join(" · ");
-  el.textContent = `${key} — ${fmt(h.totalSeconds)} total · ${h.sessions||0} sessions` + (books? " · "+books : "");
+function getReportMonthRange(){
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth() + reportMonthOffset;
+  const start = new Date(y, m, 1);
+  const end = new Date(y, m + 1, 0);
+  const todayKey = today();
+  const startKey = formatDateKey(start);
+  const endKey = formatDateKey(end);
+  const clampEnd = endKey > todayKey ? todayKey : endKey;
+  const label = start.toLocaleString(undefined, { month: "long", year: "numeric" });
+  const labelBn = start.toLocaleString("bn-BD", { month: "long", year: "numeric" });
+  return { start, end, startKey, endKey, clampEnd, label, labelBn, y: start.getFullYear(), mo: start.getMonth() };
 }
 
-function setReportPeriod(p){
-  reportPeriod = p;
-  document.getElementById("btnReportWeekly")?.classList.toggle("active", p==="weekly");
-  document.getElementById("btnReportMonthly")?.classList.toggle("active", p==="monthly");
+function shiftReportMonth(dir){
+  const next = reportMonthOffset + dir;
+  if(next > 0) return;
+  reportMonthOffset = next;
+  reportSelectedDay = null;
   renderReports();
 }
-function renderReports(){
-  renderHeatmap();
-  const sumBox = document.getElementById("reportSummary");
-  const subBox = document.getElementById("reportSubjectList");
-  const catchBox = document.getElementById("catchupList");
-  if(!sumBox) return;
 
-  const now = new Date();
-  let from;
-  if(reportPeriod==="weekly"){
-    from = new Date(now); from.setDate(from.getDate() - 6);
-  } else {
-    from = new Date(now.getFullYear(), now.getMonth(), 1);
-  }
-  const fromKey = formatDateKey(from);
+function jumpReportMonth(offset){
+  if(offset > 0) return;
+  reportMonthOffset = offset;
+  reportSelectedDay = null;
+  renderReports();
+}
+
+function collectMonthStats(startKey, clampEnd){
   let totalSec = 0, daysActive = 0, sessions = 0;
   const byBook = {};
-  Object.entries(history || {}).forEach(([k,h])=>{
-    if(k >= fromKey && k <= today()){
-      const s = Number(h.totalSeconds||0);
-      if(s>0){ totalSec += s; daysActive++; sessions += Number(h.sessions||0); }
-      Object.entries(h.byBook||{}).forEach(([b,bs])=>{ byBook[b] = (byBook[b]||0) + Number(bs||0); });
-    }
+  const days = [];
+  const byDay = {};
+  Object.entries(history || {}).forEach(([k, h])=>{
+    if(k < startKey || k > clampEnd) return;
+    const s = Number(h.totalSeconds || 0);
+    const sess = Number(h.sessions || 0);
+    if(s > 0){ totalSec += s; daysActive++; }
+    sessions += sess;
+    Object.entries(h.byBook || {}).forEach(([b, bs])=>{
+      byBook[b] = (byBook[b] || 0) + Number(bs || 0);
+    });
+    const row = {
+      key: k,
+      sec: s,
+      sessions: sess,
+      byBook: { ...(h.byBook || {}) },
+      byChapter: { ...(h.byChapter || {}) }
+    };
+    days.push(row);
+    byDay[k] = row;
   });
-  let done=0, total=0;
-  Object.entries(BOOKS).forEach(([b,arr])=>{ total+=arr.length; arr.forEach((_,i)=>{ if(progress[chKey(b,i+1)]==="complete") done++; }); });
-  const tasksDone = (todos||[]).filter(t=>t.status==="complete" && t.completedAt && formatDateKey(new Date(t.completedAt)) >= fromKey).length;
+  days.sort((a, b) => b.key.localeCompare(a.key));
+  return { totalSec, daysActive, sessions, byBook, days, byDay };
+}
 
-  sumBox.innerHTML = `
-    <div class="stat"><div class="label">Study Time</div><div class="value">${fmt(totalSec)}</div><div class="sub">${reportPeriod}</div></div>
-    <div class="stat"><div class="label">Active Days</div><div class="value">${daysActive}</div><div class="sub">days studied</div></div>
-    <div class="stat"><div class="label">Tasks Done</div><div class="value" style="color:var(--success)">${tasksDone}</div><div class="sub">completed</div></div>
-    <div class="stat"><div class="label">Syllabus</div><div class="value" style="color:var(--primary)">${fmtPct(total?done/total*100:0)}</div><div class="sub">${done}/${total} chapters</div></div>`;
+function listHistoryMonths(){
+  const map = new Map();
+  const now = new Date();
+  const curKey = now.getFullYear() * 12 + now.getMonth();
+  Object.keys(history || {}).forEach(k=>{
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
+    const d = new Date(k + "T12:00:00");
+    if(isNaN(d.getTime())) return;
+    const key = d.getFullYear() * 12 + d.getMonth();
+    if(key > curKey) return;
+    if(!map.has(key)) map.set(key, { y: d.getFullYear(), m: d.getMonth() });
+  });
+  map.set(curKey, { y: now.getFullYear(), m: now.getMonth() });
+  return [...map.entries()].sort((a, b) => b[0] - a[0]).map(([key, v])=>{
+    const start = new Date(v.y, v.m, 1);
+    const end = new Date(v.y, v.m + 1, 0);
+    const startKey = formatDateKey(start);
+    const endKey = formatDateKey(end);
+    const todayKey = today();
+    const clampEnd = endKey > todayKey ? todayKey : endKey;
+    const st = collectMonthStats(startKey, clampEnd);
+    const dayCount = end.getDate();
+    const pct = Math.min(100, Math.round((st.daysActive / dayCount) * 100));
+    const offset = (v.y - now.getFullYear()) * 12 + (v.m - now.getMonth());
+    return {
+      offset, y: v.y, m: v.m,
+      label: start.toLocaleString(undefined, { month: "long", year: "numeric" }),
+      labelBn: start.toLocaleString("bn-BD", { month: "long", year: "numeric" }),
+      ...st, dayCount, pct
+    };
+  });
+}
 
-  if(subBox){
-    const sorted = Object.entries(byBook).sort((a,b)=>b[1]-a[1]);
-    subBox.innerHTML = sorted.length ? sorted.map(([b,s])=>`<div class="listrow"><span>${esc(b)}</span><strong>${fmt(s)}</strong></div>`).join("") : `<div class="community-empty">No subject study time in this period.</div>`;
+function showReportDayDetail(key){
+  reportSelectedDay = key;
+  const el = document.getElementById("reportDayDetail");
+  const title = document.getElementById("reportDayTitle");
+  if(!el) return;
+  document.querySelectorAll(".rep-cal-cell.selected").forEach(n=>n.classList.remove("selected"));
+  const cell = document.querySelector('.rep-cal-cell[data-day="'+key+'"]');
+  if(cell) cell.classList.add("selected");
+  document.querySelectorAll("#reportDayList .listrow").forEach(n=>{
+    n.classList.toggle("active-day", n.getAttribute("data-day") === key);
+  });
+
+  const dObj = new Date(key + "T12:00:00");
+  const nice = isNaN(dObj.getTime()) ? key : dObj.toLocaleDateString("bn-BD", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  if(title) title.textContent = nice;
+
+  const h = history[key];
+  if(!h || !Number(h.totalSeconds)){
+    el.innerHTML = `<div class="rep-day-kicker">${esc(nice)}</div>
+      <div class="community-empty" style="padding:18px 8px">এই দিনে কোনো study record নেই।</div>`;
+    return;
+  }
+  const books = Object.entries(h.byBook || {})
+    .sort((a, b) => Number(b[1]) - Number(a[1]));
+  const maxB = books.length ? Number(books[0][1]) || 1 : 1;
+  const bookHtml = books.length
+    ? books.map(([b, s])=>{
+        const sec = Number(s) || 0;
+        const pct = Math.round((sec / maxB) * 100);
+        return `<div class="rep-sub-row"><span>${esc(b)}</span><strong>${fmt(sec)}</strong></div>
+          <div class="rep-sub-bar"><i style="width:${pct}%"></i></div>`;
+      }).join("")
+    : `<div class="sub">Subject-wise breakdown নেই</div>`;
+
+  const chEntries = Object.entries(h.byChapter || {})
+    .map(([ck, s])=>({ ck, sec: Number(s)||0 }))
+    .filter(x=>x.sec>0)
+    .sort((a,b)=>b.sec-a.sec)
+    .slice(0, 8);
+  const chHtml = chEntries.length
+    ? `<div style="margin-top:12px"><div class="sub" style="font-weight:700;margin-bottom:4px">Chapter-wise</div>
+        ${chEntries.map(c=>`<div class="rep-sub-row"><span>${esc(c.ck.replace("__"," · Ch "))}</span><strong>${fmt(c.sec)}</strong></div>`).join("")}
+       </div>`
+    : "";
+
+  el.innerHTML = `<div class="rep-day-kicker">${esc(nice)}</div>
+    <div class="rep-day-time">${fmt(Number(h.totalSeconds)||0)}</div>
+    <div class="sub" style="margin:4px 0 10px">${Number(h.sessions)||0} study session</div>
+    <div class="sub" style="font-weight:700;margin-bottom:4px">পড়াশোনার বিষয়সমূহ</div>
+    ${bookHtml}${chHtml}`;
+}
+
+function renderReportCalendar(range, byDay){
+  const box = document.getElementById("reportCalendar");
+  if(!box) return;
+  const todayKey = today();
+  const firstDow = range.start.getDay();
+  const daysInMonth = range.end.getDate();
+  let html = "";
+  for(let i = 0; i < firstDow; i++) html += `<div class="rep-cal-cell pad"></div>`;
+  for(let d = 1; d <= daysInMonth; d++){
+    const dt = new Date(range.y, range.mo, d);
+    const key = formatDateKey(dt);
+    const isFuture = key > todayKey;
+    const studied = !isFuture && byDay[key] && byDay[key].sec > 0;
+    const selected = reportSelectedDay === key;
+    let cls = "rep-cal-cell";
+    if(isFuture) cls += " future";
+    else if(selected) cls += " selected studied";
+    else if(studied) cls += " studied";
+    const title = studied ? `${key}: ${fmt(byDay[key].sec)}` : key;
+    const click = isFuture ? "" : ` onclick="showReportDayDetail('${key}')"`;
+    html += `<button type="button" class="${cls}" data-day="${key}" title="${esc(title)}"${click}>${d}</button>`;
+  }
+  box.innerHTML = html;
+}
+
+function renderReportArchive(){
+  const box = document.getElementById("reportMonthArchive");
+  if(!box) return;
+  const months = listHistoryMonths();
+  box.innerHTML = months.map(m=>{
+    const active = m.offset === reportMonthOffset ? " active" : "";
+    return `<button type="button" class="rep-arch-card${active}" onclick="jumpReportMonth(${m.offset})">
+      <div class="rep-arch-m">${esc(m.label)}</div>
+      <div class="rep-arch-t">${fmt(m.totalSec)}</div>
+      <div class="rep-arch-s">${m.daysActive} দিন · ${m.sessions} সেশন</div>
+      <div class="progress"><div class="fill" style="width:${m.pct}%"></div></div>
+      <div class="rep-arch-s" style="margin-top:4px">${m.pct}% active days</div>
+    </button>`;
+  }).join("");
+}
+
+function renderReports(){
+  const sumBox = document.getElementById("reportSummary");
+  const subBox = document.getElementById("reportSubjectList");
+  const dayBox = document.getElementById("reportDayList");
+  const catchBox = document.getElementById("catchupList");
+  const labelEl = document.getElementById("reportMonthLabel");
+  const sumMonth = document.getElementById("reportSummaryMonth");
+  const nextBtn = document.getElementById("btnReportNext");
+  if(!sumBox) return;
+
+  const range = getReportMonthRange();
+  if(labelEl) labelEl.textContent = range.label + (range.labelBn ? " (" + range.labelBn + ")" : "");
+  if(sumMonth) sumMonth.textContent = range.label;
+  if(nextBtn) nextBtn.disabled = reportMonthOffset >= 0;
+
+  const { totalSec, daysActive, sessions, byBook, days, byDay } = collectMonthStats(range.startKey, range.clampEnd);
+  const dayCount = Math.max(1, Number(range.end.getDate()));
+  const avgSec = daysActive ? Math.round(totalSec / daysActive) : 0;
+
+  if(!reportSelectedDay || reportSelectedDay < range.startKey || reportSelectedDay > range.endKey){
+    if(byDay[today()] && today() >= range.startKey && today() <= range.endKey) reportSelectedDay = today();
+    else if(days.length) reportSelectedDay = days[0].key;
+    else reportSelectedDay = range.startKey;
   }
 
+  renderReportArchive();
+  renderReportCalendar(range, byDay);
+
+  sumBox.innerHTML = `
+    <div class="stat"><div class="label">মোট পড়ার সময়</div><div class="value">${fmt(totalSec)}</div><div class="sub">${range.label}</div></div>
+    <div class="stat"><div class="label">পড়ার দিন</div><div class="value">${daysActive}</div><div class="sub">of ${dayCount} days</div></div>
+    <div class="stat"><div class="label">মোট Sessions</div><div class="value">${sessions}</div><div class="sub">focus sessions</div></div>
+    <div class="stat"><div class="label">দৈনিক গড়</div><div class="value">${fmt(avgSec)}</div><div class="sub">per active day</div></div>`;
+
+  if(subBox){
+    const sorted = Object.entries(byBook).sort((a, b) => b[1] - a[1]);
+    const sumB = sorted.reduce((a, [, s]) => a + s, 0) || 1;
+    subBox.innerHTML = sorted.length
+      ? sorted.map(([b, s]) => {
+          const pct = Math.round((s / sumB) * 1000) / 10;
+          return `<div class="listrow" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 0">
+            <div class="row"><span style="font-weight:650">${esc(b)}</span><strong style="color:var(--primary)">${fmt(s)} · ${pct}%</strong></div>
+            <div class="rep-sub-bar"><i style="width:${Math.min(100,pct)}%"></i></div>
+          </div>`;
+        }).join("")
+      : `<div class="community-empty">এই মাসে কোনো subject study time নেই।</div>`;
+  }
+
+  const hint = document.getElementById("reportDayListHint");
+  if(hint) hint.textContent = days.length ? days.length + " days" : "";
+
+  if(dayBox){
+    if(!days.length){
+      dayBox.innerHTML = `<div class="community-empty">এই মাসে কোনো study day নেই।</div>`;
+    } else {
+      dayBox.innerHTML = days.map(d => {
+        const dObj = new Date(d.key + "T12:00:00");
+        const dayName = dObj.toLocaleDateString("bn-BD", { weekday: "short" });
+        const dateShort = dObj.toLocaleDateString("bn-BD", { day: "numeric", month: "short" });
+        const active = d.key === reportSelectedDay ? " active-day" : "";
+        return `<button type="button" class="listrow${active}" data-day="${esc(d.key)}" onclick="showReportDayDetail('${esc(d.key)}')">
+          <div style="min-width:0;flex:1">
+            <strong>${esc(dateShort)}</strong>
+            <div class="sub">${esc(dayName)}</div>
+          </div>
+          <div style="text-align:right;flex:none">
+            <strong style="color:var(--primary)">${fmt(d.sec)}</strong>
+            <div class="sub">${d.sessions || 0} sess</div>
+          </div>
+        </button>`;
+      }).join("");
+    }
+  }
+
+  showReportDayDetail(reportSelectedDay);
+
   if(catchBox){
-    const overdue = (todos||[]).filter(t=>t.status!=="complete" && t.date && t.date < today()).sort((a,b)=>a.date.localeCompare(b.date));
+    const overdue = (todos || []).filter(t => t.status !== "complete" && t.date && t.date < today())
+      .sort((a, b) => a.date.localeCompare(b.date));
     if(!overdue.length){
       catchBox.innerHTML = `<div class="community-empty">No overdue tasks — great job!</div>`;
     } else {
-      catchBox.innerHTML = overdue.slice(0,12).map(t=>`<div class="listrow">
-        <div><strong>${esc(t.title)}</strong><div class="sub">Due ${esc(t.date)} · ${esc(t.priority||"medium")}</div></div>
+      catchBox.innerHTML = overdue.slice(0, 12).map(t => `<div class="listrow">
+        <div><strong>${esc(t.title)}</strong><div class="sub">Due ${esc(t.date)} · ${esc(t.priority || "medium")}</div></div>
         <div style="display:flex;gap:5px">
           <button class="mini" data-todo-reschedule="${esc(t.id)}">Reschedule</button>
           <button class="mini" data-todo-done="${esc(t.id)}">✓ Done</button>
@@ -7719,6 +8181,104 @@ function renderReports(){
       </div>`).join("");
     }
   }
+}
+
+function pdfEscape(s){
+  return String(s).replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)");
+}
+function downloadMonthlyReportPdf(){
+  const range = getReportMonthRange();
+  const { totalSec, daysActive, sessions, byBook, days, byDay } = collectMonthStats(range.startKey, range.clampEnd);
+  const sorted = Object.entries(byBook).sort((a, b) => b[1] - a[1]);
+  const dayCount = range.end.getDate();
+  const avgSec = daysActive ? Math.round(totalSec / daysActive) : 0;
+  const fileName = range.label.replace(/\s+/g, "-") + "-Study-Report.pdf";
+
+  const lines = [];
+  lines.push("SSC StudyHub - Monthly Study Report");
+  lines.push(range.label);
+  lines.push("Generated: " + today());
+  lines.push("");
+  lines.push("SUMMARY");
+  lines.push("Total study time: " + fmt(totalSec));
+  lines.push("Active days: " + daysActive + " / " + dayCount);
+  lines.push("Sessions: " + sessions);
+  lines.push("Daily average (active days): " + fmt(avgSec));
+  lines.push("");
+  lines.push("SUBJECT BREAKDOWN");
+  if(!sorted.length) lines.push("(no subject data)");
+  else sorted.forEach(([b, s])=> lines.push("- " + b + ": " + fmt(s)));
+  lines.push("");
+  lines.push("DAILY HISTORY");
+  if(!days.length) lines.push("(no study days)");
+  else days.forEach(d=>{
+    const parts = Object.entries(d.byBook || {}).sort((a,b)=>Number(b[1])-Number(a[1])).map(([b,s])=>b+": "+fmt(Number(s)||0)).join(", ");
+    lines.push(d.key + " | " + fmt(d.sec) + " | " + (d.sessions||0) + " sess" + (parts ? " | " + parts : ""));
+  });
+  lines.push("");
+  lines.push("CALENDAR (studied days marked *)");
+  const firstDow = range.start.getDay();
+  let week = "    ".repeat(firstDow);
+  for(let d = 1; d <= dayCount; d++){
+    const key = formatDateKey(new Date(range.y, range.mo, d));
+    const mark = (byDay[key] && byDay[key].sec > 0) ? "*" : " ";
+    week += (String(d).padStart(2," ") + mark + " ");
+    if((firstDow + d) % 7 === 0 || d === dayCount){ lines.push(week); week = ""; }
+  }
+  lines.push("");
+  lines.push("Note: PDF uses English labels for offline compatibility. All numbers are from your real study history.");
+
+  const text = lines.join("\n");
+  const chunks = [];
+  const maxLinesPerPage = 48;
+  const allLines = text.split("\n");
+  for(let i = 0; i < allLines.length; i += maxLinesPerPage){
+    chunks.push(allLines.slice(i, i + maxLinesPerPage));
+  }
+  if(!chunks.length) chunks.push([""]);
+
+  const objects = [];
+  objects.push("<< /Type /Catalog /Pages 2 0 R >>");
+  const pageIds = [];
+  let objIndex = 3;
+  const contentIds = [];
+  chunks.forEach(()=>{ pageIds.push(objIndex++); contentIds.push(objIndex++); });
+  objects.push("<< /Type /Pages /Kids [" + pageIds.map(id=>id+" 0 R").join(" ") + "] /Count " + pageIds.length + " >>");
+
+  chunks.forEach((pageLines, idx)=>{
+    const content = pageLines.map((ln, i)=>{
+      const y = 800 - i * 14;
+      return "BT /F1 10 Tf 40 "+y+" Td ("+pdfEscape(ln)+") Tj ET";
+    }).join("\n");
+    const stream = content;
+    objects.push("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents "+contentIds[idx]+" 0 R /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> >>");
+    objects.push("<< /Length "+stream.length+" >>\nstream\n"+stream+"\nendstream");
+  });
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  objects.forEach((body, i)=>{
+    offsets.push(pdf.length);
+    pdf += (i + 1) + " 0 obj\n" + body + "\nendobj\n";
+  });
+  const xrefPos = pdf.length;
+  pdf += "xref\n0 " + (objects.length + 1) + "\n";
+  pdf += "0000000000 65535 f \n";
+  for(let i = 1; i <= objects.length; i++){
+    pdf += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
+  }
+  pdf += "trailer\n<< /Size " + (objects.length + 1) + " /Root 1 0 R >>\nstartxref\n" + xrefPos + "\n%%EOF";
+
+  const blob = new Blob([pdf], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  toast("📄 " + fileName + " downloaded");
 }
 
 function saveGoalsFromInsights(){
@@ -8035,7 +8595,7 @@ document.addEventListener("keydown", (e)=>{
   if(k === "p" || k === "P"){ e.preventDefault(); openPomodoro(); return; }
   if(k === "/"){ e.preventDefault(); switchTab("syllabus"); const s=document.getElementById("searchInput"); if(s){ s.focus(); s.select?.(); } return; }
   if(k === "d" || k === "D"){ e.preventDefault(); toggleTheme(); return; }
-  const tabMap = {"1":"syllabus","2":"exams","3":"todo","4":"history","5":"insights","6":"notes","7":"revision","8":"reports","9":"community"};
+  const tabMap = {"1":"syllabus","2":"exams","3":"todo","4":"history","5":"insights","6":"notes","7":"revision","8":"reports"};
   if(tabMap[k]){ e.preventDefault(); switchTab(tabMap[k]); }
 });
 
@@ -8053,21 +8613,17 @@ function init(){
     const saveOnLeave=()=>{flushStudySeconds(true);savePomoState();};
     window.addEventListener("beforeunload",saveOnLeave);
     window.addEventListener("pagehide",saveOnLeave);
-    // Stay on the same tab after a reload (e.g. Community).
+    // Stay on the same tab after a reload.
     try{
         const t=localStorage.getItem("sscHub_activeTab");
         if(t&&t!=="syllabus"&&document.getElementById(t+"Panel"))switchTab(t);
     }catch(e){}
 }
-function closeCommunityLeaveConfirm(){}
 document.addEventListener("DOMContentLoaded",init);
 </script>
 
-<!-- Community V2 dialog (replaces alert/confirm/prompt inside Community) -->
 
 
-<!-- Community integration. Requires project URL + anon key; no service-role key belongs in client code. -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Dashboard Name Modal -->
 <div id="userNameModal" class="modal">
   <div class="card modalbox" style="max-width:400px">
@@ -8717,5 +9273,53 @@ try{pixSet(readPct())}catch(e){}
 })();
 </script>
 
+<script id="chapterFxScript">
+/* Wraps toggleChapterStatus (original untouched): keeps scroll position steady after the list re-renders,
+   then plays a short animation on the clicked chapter only. Data/logic are not changed. */
+(function(){
+"use strict";
+try{
+  var orig=window.toggleChapterStatus;
+  if(typeof orig!=="function") return;
+  var RM=false;try{RM=window.matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){}
+  function burst(el,n){
+    if(RM||!el) return;
+    var r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+    var cols=["var(--primary)","var(--purple)","var(--success)","var(--warning)"];
+    for(var i=0;i<n;i++){
+      var s=document.createElement("span");s.className="fx-confetti"+(n>14?" fx-lg":"");
+      var a=Math.random()*Math.PI*2,d=36+Math.random()*(n>14?90:56);
+      s.style.left=x+"px";s.style.top=y+"px";s.style.background=cols[i%4];
+      s.style.setProperty("--x",Math.cos(a)*d+"px");
+      s.style.setProperty("--y",(Math.sin(a)*d-28)+"px");
+      s.style.setProperty("--r",(Math.random()*400-200)+"deg");
+      document.body.appendChild(s);
+      (function(q){setTimeout(function(){q.remove()},1050)})(s);
+    }
+  }
+  window.toggleChapterStatus=function(b,c){
+    var y=window.pageYOffset||0;
+    var res=orig.apply(this,arguments);
+    try{
+      if(Math.abs((window.pageYOffset||0)-y)>1) window.scrollTo(0,y);
+      var el=document.getElementById("ch_"+String(b).replace(/[^a-zA-Z0-9]/g,"_")+"_"+c);
+      if(el&&!RM){
+        var cls=el.classList.contains("complete")?"fx-done":el.classList.contains("in-progress")?"fx-prog":"";
+        if(cls){
+          el.classList.add(cls);
+          setTimeout(function(){el.classList.remove(cls)},1100);
+          if(cls==="fx-done"){
+            var all=false;
+            try{all=BOOKS[b].every(function(_,i){return progress[chKey(b,i+1)]==="complete"})}catch(e){}
+            burst(el.querySelector(".num")||el,all?26:12);
+          }
+        }
+      }
+    }catch(e){}
+    return res;
+  };
+}catch(e){}
+})();
+</script>
 </body>
 </html>
